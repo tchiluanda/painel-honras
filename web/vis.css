@@ -1,0 +1,29 @@
+div.vis-container {
+    display: grid;
+    grid-template-rows: 75% 25%;
+    grid-template-columns: 50% 50%;
+    grid-template-areas:
+      "vis-principal vis-principal"
+      "vis-auxiliar1 vis-auxiliar2";
+    max-width: 1080px;
+    margin: 0 auto;
+}
+
+svg {
+    border: 1px solid coral;
+    width: 100%;
+    height: 100%;
+}
+
+svg.vis-principal {
+    grid-area: vis-principal;
+}
+
+svg.vis-auxiliar1 {
+    grid-area: vis-auxiliar1;
+}
+
+svg.vis-auxiliar2 {
+    grid-area: vis-auxiliar2;
+
+}

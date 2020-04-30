@@ -1,0 +1,94 @@
+:root {
+    --cor-fundo: #ffde59;
+    --cor-escura: #806F2D;
+    --cor-fonte: rgb(75,75,75);
+    --cor-fonte-clara: white;
+    --fonte-serifa: "Merriweather";
+    --fonte-sem-serifa: "Merriweather Sans";
+    font-size: 1em;
+    font-family: var(--fonte-serifa);
+    background-color: var(--cor-fundo);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+header.logo {
+    width: 100%;
+    background-color: var(--cor-escura);
+    padding: 10px;
+    box-shadow: 0 0 5px 1px var(--cor-escura);
+    margin: 0;
+}
+
+header img.logo-tt {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.centralizado {
+    max-width: 48rem;
+    margin: 0 auto;
+}
+
+main > header {
+    color: var(--cor-fonte);
+    font-family: var(--fonte-sem-serifa);
+    padding: 1rem 0;
+}
+
+main > header > h1 {
+    font-size: 3rem;
+    font-weight: bolder;
+    margin-top: 0rem;
+    margin-bottom: 1rem;
+    font-family: var(--fonte-serifa);
+    color: var(--cor-escura);
+}
+
+
+
+nav.controle-vis {
+    display: flex;
+    justify-content: center;
+}
+
+nav.controle-vis:first-child {
+    margin-bottom: 1rem;
+}
+
+nav.controle-vis:last-child > button {
+    font-size: 0.8em;
+}
+
+nav.controle-vis button {
+    padding: 0.4em 0.5em;
+    margin-right: 0.5em;
+    background: none;
+    border: none;
+    border-bottom: 5px solid transparent;;
+    font-family: "Merriweather Sans", sans-serif;
+}
+
+nav.controle-vis button:focus {
+    outline: none;
+}
+
+nav.controle-vis button.selected {
+    border-bottom: 5px solid var(--cor-escura);
+    color: var(--cor-escura);
+    font-weight: bold;
+}
+
+nav.controle-vis button:hover {
+    border-bottom: 5px solid var(--cor-escura);
+}
+
+
+

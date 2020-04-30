@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Honras</title>
+    <link href="https://fonts.googleapis.com/css?family=Merriweather:300,300i,400,400i,700,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Merriweather+Sans:300,300i,400,400i,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./web/main.css">
+    <link rel="stylesheet" href="./web/vis.css">
+    <link rel="icon" type="image/png" href="./img/favicon.png"/>
+</head>
+<body>
+    <header class="logo">
+        <img class="logo-tt" src="./img/tt-logo-int.png" alt="logo do Tesouro Nacional Transparente">
+    </header>
+    <main>
+        <header class="centralizado">
+            <h1>Portal de Honras</h1>
+            <p>Até <span class="js--ultima-data">20 de abril de 2020</span>, a União já havia efetuado <strong class="js--qde-honras">951</strong> pagamentos a credores de empréstimos não pagos por Estados e Municípios com garantia da União.</p>
+        </header>
+        <div class="grupo-controles">
+            <nav class="controle-vis centralizado">
+                <button id="agregado" class="selected">Valores Agregados</button>
+                <button id="detalhado">Valores Detalhados</button>
+            </nav>
+            <nav class="controle-vis centralizado">
+                <button id="por_mutuario" class="selected">Mutuários</button>
+                <button id="por_credor">Credores</button>
+                <button id="por_tipo">Tipo</button>
+                <button id="por_ano">Anos</button>
+            </nav>
+        </div>
+        <div class="vis-container">
+            <svg class="vis-principal"></svg>
+            <svg class="vis-auxiliar1"></svg>
+            <svg class="vis-auxiliar2"></svg>
+        </div>
+    </main>
+    
+</body>
+<script src="web/external_scripts/d3.v5.min.js"></script>
+<script src="web/vis.js"></script>  
+</html>
