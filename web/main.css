@@ -14,7 +14,7 @@
     box-sizing: border-box;
 }
 
-body {
+body, p {
     margin: 0;
 }
 
@@ -40,14 +40,14 @@ header img.logo-tt {
 main > header {
     color: var(--cor-fonte);
     font-family: var(--fonte-sem-serifa);
-    padding: 1rem 0;
+    padding: 1rem 0 2rem;
 }
 
 main > header > h1 {
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: bolder;
     margin-top: 0rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     font-family: var(--fonte-serifa);
     color: var(--cor-escura);
 }
