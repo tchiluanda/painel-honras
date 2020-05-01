@@ -9,9 +9,10 @@ library(padr)
 #extrafont::font_import()
 loadfonts()
 
-# honras: dados para viz --------------------------------------------------
 
-honras <- read.csv2("./R_prep_vis/outros_dados/relatorio_honras_atrasos.csv",
+# importa dados -----------------------------------------------------------
+
+honras <- read.csv2("./R/relatorio_honras_atrasos.csv",
                     skip = 10, stringsAsFactors = FALSE)
 
 names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato", 
@@ -22,6 +23,9 @@ names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato",
                    "Honra - Total (Moeda de Origem)", "Honra - Principal (R$)", 
                    "Honra Juros/Encargos (R$)", "Honra - Mora (R$)", "Honra - Total (R$)", 
                    "Ano Regularização", "Mês Regularização", "X24")
+
+
+# processamento inicial ---------------------------------------------------
 
 honras_simples_pre <- honras %>%
   select(data = `Data de Vencimento`,
@@ -79,23 +83,7 @@ contagem_honras_avancado <- honras_simples %>%
   mutate(pos = row_number()) %>%
   ungroup()
 
-# não precisa disso. mas preciso dos top estados/municipios para criar um "demais",
-# e recriar a variável "estado".
-# rank_honras_cat <- contagem_honras_avancado %>%
-#   group_by(credor_cat) %>%
-#   summarise(soma_credor_cat = sum(valor)) %>%
-#   ungroup() %>%
-#   mutate(rank_credor_cat = rank(-soma_credor_cat))
-# 
-# rank_honras_tip <- contagem_honras_avancado %>%
-#   group_by(tipo_divida) %>%
-#   summarise(soma_credor_tip = sum(valor)) %>%
-#   ungroup() %>%
-#   mutate(rank_credor_tip = rank(-soma_credor_tip)) 
 
-# honras_det <- contagem_honras_avancado %>%
-#   left_join(rank_honras_cat) %>%
-#   left_join(rank_honras_tip)
 
 honras_det <- contagem_honras_avancado
 
@@ -138,3 +126,20 @@ ggplot(honras_det, aes(y = pos, x = data_mes)) + geom_point()
 honras_det %>% filter(ano == 2020) %>% group_by(Credor) %>% summarise(sum(valor)) %>% arrange(desc(`sum(valor)`))
 
 View(honras_det %>% count(data_mes))
+
+
+# prototipos das viz ------------------------------------------------------
+
+plota_sumario <- function(variavel) {
+  
+  quo_var <- enquo(variavel)
+
+  ggplot(honras_simples_pre %>%
+           group_by(!! quo_var) %>%
+           summarise(valor = sum(valor)),
+         aes(y = reorder(!! quo_var, valor), x = valor)) +
+    geom_col()
+}
+
+
+plota_sumario(mutuario)
