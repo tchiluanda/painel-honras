@@ -155,6 +155,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
      
       const opcao = this.id;
 
+      $botoes_categorias.classed("selected", false);
+      d3.select(this).classed("selected", true);
+
       console.log(opcao, this.id, this);
 
       desenha_principal(opcao);
