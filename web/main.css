@@ -1,11 +1,12 @@
 :root {
     --cor-fundo: #FFEDA6; /*#ffde59;*/
+    --cor-fundo: white;
     --cor-escura: #806F2D;
     --cor-fonte: rgb(75,75,75);
     --cor-fonte-clara: white;
     --fonte-serifa: "Merriweather";
     --fonte-sem-serifa: "Merriweather Sans";
-    font-size: 1em;
+    font-size: 0.8em;
     font-family: var(--fonte-serifa);
     background-color: var(--cor-fundo);
 }
@@ -44,12 +45,12 @@ main > header {
 }
 
 main > header > h1 {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bolder;
     margin-top: 0rem;
     margin-bottom: 0.5rem;
     font-family: var(--fonte-serifa);
-    color: var(--cor-escura);
+    /*color: var(--cor-escura);*/
 }
 
 

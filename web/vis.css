@@ -11,7 +11,7 @@ div.vis-container {
 }
 
 svg {
-    border: 1px solid coral;
+    outline: 1px solid coral;
     width: 100%;
     height: 100%;
 }
