@@ -40,5 +40,12 @@ d3.csv("dados/dados.csv").then(function(dados) {
     console.log(dados.columns);
     // ["", "data", "tipo_divida", "Credor", "contrato", "tipo_credor", "mutuario", "tipo_mutuario", "Status", "valor", "mes", "ano", "mes_ano", "data_mes", "pos_ini_mutuario", "pos_ini_Credor", "pos_ini_tipo_divida", "pos_ini_ano"]
 
-    console.log(group_by_sum(dados, "mutuario", "valor", true));
+    const variaveis_de_interesse = ["mutuario", "Credor", "tipo_divida", "ano"];
+
+    const sumarios = {};
+    for (variavel of variaveis_de_interesse) {
+        sumarios[variavel] = group_by_sum(dados, variavel, "valor", true)
+    };
+
+    console.log(sumarios)
 })
