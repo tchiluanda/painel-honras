@@ -32,3 +32,22 @@ svg.vis-timeline {
     grid-area: vis-timeline;
 
 }
+
+.axis line,
+.axis path {
+    stroke: #555;
+}
+
+.y-axis path {
+    stroke: none;
+}
+
+g.axis .tick line {
+    stroke: none;
+}
+
+.axis text {
+    font-family: "Merriweather Sans";
+    font-weight: 100;
+    color: #555;
+}

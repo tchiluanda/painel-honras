@@ -18,8 +18,11 @@ const margin = {
     top : 10,
     right : 10,
     bottom: 10,
-    left: 40
+    left: 120
 };
+
+const duracao = 500;
+const cor_padrao = "#444";
 
 const h = svg_prin.style("height");
 const w = svg_prin.style("width");
@@ -43,27 +46,34 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     const variaveis_de_interesse = ["mutuario", "Credor", "tipo_divida", "ano"];
 
-    const sumarios = {};
+    const subtotais = {};
+    const dominios = {};
     const maximos = [];
     for (variavel of variaveis_de_interesse) {
-        sumarios[variavel] = group_by_sum(dados, variavel, "valor", true);
-        const maximo = d3.max(sumarios[variavel], d => d.subtotal);
+        subtotais[variavel] = group_by_sum(dados, variavel, "valor", true);
+        dominios[variavel] = subtotais[variavel].map(d => d.categoria);
+        const maximo = d3.max(subtotais[variavel], d => d.subtotal);
         maximos.push(maximo);
     };
 
-    console.log(sumarios, maximos);
+    console.log(subtotais, maximos);
 
     const max_valor = d3.max(maximos);
 
     // dentro da funcao de desenhar
 
-    const dominio = sumarios["mutuario"].map(d => d.categoria);
-
     // escalas
-    const y = d3.scaleBand()
-        .domain(dominio)
-        .rangeRound([margin.top, +h.slice(0, h.length-2) - margin.bottom]);
 
+    // vai mudar
+    let y = d3.scaleBand()
+        .domain(dominios["mutuario"])
+        .range([margin.top, +h.slice(0, h.length-2) - margin.bottom]);
+
+    let color = d3.scaleOrdinal()
+        .domain(dominios["Credor"])
+        .range(d3.schemeTableau10.concat(d3.schemeSet3));
+
+    // fixa
     const tamanho = d3.scaleLinear()
         .domain([0, max_valor])
         .range([0, +w.slice(0, w.length-2) - margin.left - margin.right]);
@@ -72,16 +82,75 @@ d3.csv("dados/dados.csv").then(function(dados) {
         .domain([0, max_valor])
         .range([margin.left, +w.slice(0, w.length-2) - margin.right]);
 
+    let eixo_y = d3.axisLeft()
+        .scale(y)
 
-    const rect = svg_prin
-    .selectAll("rect")
-    .data(dados)
-    .enter()
-    .append("rect")
-    .attr("x", d => x(+d.pos_ini_mutuario))
-    .attr("y", d => y(d.mutuario))
-    .attr("width", d => tamanho(+d.valor))
-    .attr("height", y.bandwidth() * 0.75);
+    // inclui eixo y
+    svg_prin
+        .append("g") 
+            .attr("class", "axis y-axis")
+            .attr("transform", "translate(" + margin.left + ",-2)")
+        .call(eixo_y);
 
+    let rect_principal = svg_prin
+        .selectAll("rect")
+        .data(dados);
 
+    const rect_principal_enter = svg_prin
+        .selectAll("rect")
+        .data(dados)
+        .enter()
+        .append("rect")
+        .attr("x", d => x(+d.pos_ini_mutuario))
+        .attr("y", d => y(d.mutuario))
+        .attr("width", d => tamanho(+d.valor))
+        .attr("height", y.bandwidth() * 0.75)
+        .attr("stroke-width", 0)
+        .attr("fill", cor_padrao);
+    
+    rect_principal = rect_principal.merge(rect_principal_enter);
+
+        //.attr("fill", d => color(d.Credor));
+
+    function desenha_principal(categoria) {
+        const color = d3.scaleOrdinal()
+            .domain(dominios[categoria])
+            .range(d3.schemeTableau10.concat(d3.schemeSet3));
+
+        const y = d3.scaleBand()
+            .domain(dominios[categoria])
+            .range([margin.top, +h.slice(0, h.length-2) - margin.bottom]);
+
+        console.log("Dentro funcao desenho, checa escala y", color(dados[0][categoria]));
+
+        rect_principal
+          .transition()
+          .duration(duracao)
+          .attr("fill", d => color(d[categoria]))
+          .transition()
+          .delay(duracao)
+          .duration(duracao)
+          .attr("x", d => x(+d["pos_ini_"+categoria]))
+          .attr("y", d => y(d[categoria]))
+          .attr("height", y.bandwidth() * 0.75)
+          .transition()
+          .delay(duracao*2)
+          .duration(duracao)
+          .attr("fill", cor_padrao)
+          
+
+    }
+
+    const $botoes_categorias = d3.selectAll("nav.js--controle-categoria > button");
+
+    console.log($botoes_categorias);
+
+    $botoes_categorias.on("click", function(){
+     
+      const opcao = this.id;
+
+      console.log(opcao, this.id, this);
+
+      desenha_principal(opcao);
+    })
 })
