@@ -5,6 +5,8 @@ library(viridis)
 library(colorspace)
 library(extrafont)
 library(padr)
+library(gganimate)
+library(rlang)
 
 #extrafont::font_import()
 loadfonts()
@@ -27,10 +29,11 @@ names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato",
 
 # processamento inicial ---------------------------------------------------
 
-honras_simples_pre <- honras %>%
+honras_pre <- honras %>%
   select(data = `Data de Vencimento`,
          tipo_divida = `Tipo de Dívida`,
          `Credor`,
+         contrato = `Nome do Contrato`,
          tipo_credor = `Classificação do Credor`,
          mutuario = `Mutuário`,
          tipo_mutuario = `Tipo de Mutuário`,
@@ -41,87 +44,47 @@ honras_simples_pre <- honras %>%
          mes = str_pad(month(data), width = 2, pad = "0"),
          ano = year(data),
          mes_ano = paste0(ano,mes),
-         mutuario_cat = case_when(
-           mutuario == "Rio de Janeiro" ~ "Estado do Rio de Janeiro",
-           mutuario == "Minas Gerais" ~ "Minas Gerais",
-           TRUE ~ "Demais entes"),
-         #estados = if_else(tipo_mutuario == "Municípios", "Municípios", mutuario),
+         data_mes = as.Date(paste(str_sub(mes_ano, 1, 4),
+                                         str_sub(mes_ano, 5, 6),
+                                         "01", sep = "-")),
          valor = as.numeric(
            str_replace(
              str_replace_all(as.character(valor), "\\.", ""), 
-             ",", "\\.")))
-
-# consultas on the fly
-honras_simples_pre %>% filter(mutuario == "Rio de Janeiro") %>% group_by(mes_ano) %>% count()
-honras_simples_pre %>% group_by(mutuario) %>% summarise(v = sum(valor)) %>% arrange(desc(v)) %>%
-  ggplot(aes(x = v, y = reorder(mutuario, v))) + geom_col()
-
-top_11_mutuarios <- honras_simples_pre %>% 
-  group_by(mutuario) %>% 
-  summarise(v = sum(valor)) %>% 
-  arrange(desc(v)) %>%
-  filter(rank(-v)<=11) %>%
-  pull(mutuario)
-
-honras_simples <- honras_simples_pre %>%
-  mutate(estados = if_else(mutuario %in% top_11_mutuarios,
-                           mutuario,
-                           "Demais"))
-
-# contagem e posições
-contagem_honras_avancado <- honras_simples %>%
-  group_by(Credor) %>%
-  mutate(qde_credor = n()) %>%
-  ungroup() %>%
-  mutate(credor_cat = ifelse(qde_credor < 20, "Demais credores", Credor)) %>%
-  #arrange(mes_ano, desc(mutuario_cat)) %>%
-  arrange(mes_ano, match(mutuario_cat, c("Estado do Rio de Janeiro", "Minas Gerais", "Demais entes"))) %>%
-  mutate(data_mes = as.Date(paste(str_sub(mes_ano, 1, 4),
-                                  str_sub(mes_ano, 5, 6),
-                                  "01", sep = "-"))) %>%
-  group_by(data_mes) %>%
-  mutate(pos = row_number()) %>%
-  ungroup()
+             ",", "\\."))) %>%
+  arrange(data)
 
 
+# empilhamento dos valores ------------------------------------------------
 
-honras_det <- contagem_honras_avancado
+# honras_stack <- honras_pre %>%
+#   group_by(mutuario) %>%
+#   mutate(pos_ini_mutuario = cumsum(valor) - valor)
 
-honras_det %>% group_by(estados) %>% summarise(soma = sum(valor), qde = n()) %>% arrange(desc(soma))
+variaveis_de_interesse <- c("mutuario", "Credor", "tipo_divida", "ano")
 
-sum(honras_det$valor[honras_det$mutuario=="Rio de Janeiro"]) / sum(honras_det$valor)
-## para streamgraph
+honras_stack <- honras_pre
 
-honras_agg <- contagem_honras_avancado %>%
-  group_by(data_mes, mutuario_cat) %>%
-  summarise(valor_mes = sum(valor),
-            qde = n()) %>%
-  ungroup() %>%
-  gather(valor_mes, qde, key = "tipo_valor", value = "valor") %>% #(1)
-  spread(mutuario_cat, value = valor) %>%
-  pad(by = "data_mes", interval = "month") %>%
-  gather(-c(data_mes, tipo_valor), key = mutuario_cat, value = valor) %>%
-  spread(tipo_valor, value = valor) %>%
-  replace_na(list(qde = 0, valor_mes = 0)) %>%
-  group_by(mutuario_cat) %>%
-  mutate(valor_acum = cumsum(valor_mes))
+for (var in variaveis_de_interesse) {
+  quo_var <- sym(var) # transforma "var", que é string, num símbolo
+  
+  honras_stack <- honras_stack %>%
+    group_by(!! quo_var) %>%
+    mutate(!! paste0("pos_ini_", var) := cumsum(valor) - valor) %>%
+    ungroup()
+}
 
-#(1): faço essa combinação de gathers e spread para "preencher" os valores
-#     de todas as categorias para todos os meses.
-
-
+ggplot(honras_stack) + geom_segment(aes(y = mutuario, yend = mutuario,
+                                     x = pos_ini_mutuario, xend = pos_ini_mutuario + valor)) +
+  theme(legend.position = "none")
 
 ## exporta
 
-write.csv(honras_det, file = "webpage/dados/dados_honras_det.csv", fileEncoding = "UTF-8")
-write.csv(honras_agg, file = "webpage/dados/dados_honras_agg.csv", fileEncoding = "UTF-8")
+write.csv(honras_stack, file = "dados/dados.csv", fileEncoding = "UTF-8")
 
 #verificacoes
 
 sum(honras_det$valor[honras_det$mutuario=="Rio de Janeiro"]) / sum(honras_det$valor)
 length(unique(honras_det$mutuario))
-
-ggplot(honras_det, aes(y = pos, x = data_mes)) + geom_point()
 
 honras_det %>% filter(ano == 2020) %>% group_by(Credor) %>% summarise(sum(valor)) %>% arrange(desc(`sum(valor)`))
 
@@ -132,7 +95,8 @@ View(honras_det %>% count(data_mes))
 
 plota_sumario <- function(variavel) {
   
-  quo_var <- enquo(variavel)
+  quo_var <- sym(variavel)
+  # quo_var <- enquo(variavel) se a entrada for um nome, e não uma string
 
   ggplot(honras_simples_pre %>%
            group_by(!! quo_var) %>%
@@ -141,5 +105,18 @@ plota_sumario <- function(variavel) {
     geom_col()
 }
 
+plota_sumario("mutuario")
+plota_sumario(Credor)
+plota_sumario(tipo_divida)
+plota_sumario(ano)
 
-plota_sumario(mutuario)
+honras_dupla <- honras_simples_pre %>%
+  mutate(layer = 1) %>%
+  bind_rows(honras_simples_pre) %>%
+  mutate(layer = ifelse(is.na(layer), 2, layer))
+
+ggplot(honras_dupla, aes(x = valor, group = paste(data, tipo_divida, Credor, mutuario))) + 
+  geom_col(position = "stack", aes(y = ifelse(layer == 1, mutuario, NA))) +
+  geom_col(position = "stack", aes(y = ifelse(layer == 2, Credor, NA))) +
+  theme(legend.position = "none") +
+  transition_states(states = layer)
