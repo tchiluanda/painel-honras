@@ -83,6 +83,11 @@ write.csv(honras_stack, file = "dados/dados.csv", fileEncoding = "UTF-8")
 
 #verificacoes
 
+dados %>% 
+  group_by(mutuario) %>% 
+  summarise(soma = sum(valor)) %>% 
+  arrange(desc(soma))
+
 sum(honras_det$valor[honras_det$mutuario=="Rio de Janeiro"]) / sum(honras_det$valor)
 length(unique(honras_det$mutuario))
 

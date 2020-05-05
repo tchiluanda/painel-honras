@@ -18,10 +18,10 @@ const margin = {
     top : 10,
     right : 10,
     bottom: 10,
-    left: 120
+    left: 200
 };
 
-const duracao = 500;
+const duracao = 1000;
 const cor_padrao = "#444";
 
 const h = svg_prin.style("height");
@@ -86,7 +86,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         .scale(y)
 
     // inclui eixo y
-    svg_prin
+    let $eixo_y = svg_prin
         .append("g") 
             .attr("class", "axis y-axis")
             .attr("transform", "translate(" + margin.left + ",-2)")
@@ -103,14 +103,12 @@ d3.csv("dados/dados.csv").then(function(dados) {
         .append("rect")
         .attr("x", d => x(+d.pos_ini_mutuario))
         .attr("y", d => y(d.mutuario))
-        .attr("width", d => tamanho(+d.valor))
+        .attr("width", d => tamanho(+d.valor) + 1)
         .attr("height", y.bandwidth() * 0.75)
         .attr("stroke-width", 0)
         .attr("fill", cor_padrao);
     
     rect_principal = rect_principal.merge(rect_principal_enter);
-
-        //.attr("fill", d => color(d.Credor));
 
     function desenha_principal(categoria) {
         const color = d3.scaleOrdinal()
@@ -120,6 +118,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
         const y = d3.scaleBand()
             .domain(dominios[categoria])
             .range([margin.top, +h.slice(0, h.length-2) - margin.bottom]);
+
+        const novo_eixo = d3.axisLeft().scale(y);
+
+        $eixo_y
+          .transition()
+          .delay(duracao)
+          .duration(duracao*2)
+          .call(novo_eixo);
 
         console.log("Dentro funcao desenho, checa escala y", color(dados[0][categoria]));
 
