@@ -18,7 +18,7 @@ const margin = {
     top : 10,
     right : 10,
     bottom: 10,
-    left: 200
+    left: 120
 };
 
 const duracao = 1000;
@@ -81,21 +81,17 @@ d3.csv("dados/dados.csv").then(function(dados) {
     const max_valor = d3.max(parametros._maximos);
     const max_comprimento = d3.max(parametros._comprimentos);
 
-    // dentro da funcao de desenhar
+    // setup (depende dimensões svg)
 
-    // escalas
+    let altura_barras = (h_numerico - margin.bottom - margin.top) / max_comprimento;
 
-    // vai mudar
     let y = d3.scaleBand()
-        .domain(parametros["mutuario"].dominios)
-        .range([margin.top, +h.slice(0, h.length-2) - margin.bottom]);
-
-    console.log("Y", y.range(), y.bandwidth(), y.domain().length);
+        // .domain(parametros["mutuario"].dominios)
+        // .range([margin.top, +h.slice(0, h.length-2) - margin.bottom]);
 
     let color = d3.scaleOrdinal()
         .range(d3.schemeTableau10.concat(d3.schemeSet3));
 
-    // fixa
     const wScale = d3.scaleLinear()
         .domain([0, max_valor])
         .range([0, w_numerico - margin.left - margin.right]);
@@ -107,7 +103,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     let eixo_y = d3.axisLeft()
         .scale(y)
 
-    let altura_barras = (y.range()[1] - y.range()[0]) / max_comprimento;
+
 
     // inclui eixo y
     let $eixo_y = svg_prin
@@ -125,13 +121,20 @@ d3.csv("dados/dados.csv").then(function(dados) {
         .data(dados)
         .enter()
         .append("rect")
-        .attr("x", d => x(+d.pos_ini_mutuario))
-        .attr("y", d => y(d.mutuario))
-        .attr("width", d => wScale(+d.valor) + 1)
+        .attr("x", w_numerico/2)
+        .attr("y", h_numerico/2)
+        .attr("width", 0)
         //.attr("height", y.bandwidth() * 0.75)
-        .attr("height", 0.75 * altura_barras)
+        .attr("height", 0)
         .attr("stroke-width", 0)
         .attr("fill", cor_padrao);
+        // .attr("x", d => x(+d.pos_ini_mutuario))
+        // .attr("y", d => y(d.mutuario))
+        // .attr("width", d => wScale(+d.valor) + 1)
+        // //.attr("height", y.bandwidth() * 0.75)
+        // .attr("height", 0.75 * altura_barras)
+        // .attr("stroke-width", 0)
+        // .attr("fill", cor_padrao);
     
     rect_principal = rect_principal.merge(rect_principal_enter);
 
@@ -145,13 +148,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
         //     .domain(parametros[categoria].dominios)
         //     .range([margin.top, +h.slice(0, h.length-2) - margin.bottom]);
 
-        const altura_necessaria_barras = altura_barras * parametros[categoria].comprimento;
+        let altura_necessaria_barras = altura_barras * parametros[categoria].comprimento;
 
-        const nova_margem_vertical = (h_numerico - altura_necessaria_barras) / 2
+        let nova_margem_vertical = (h_numerico - altura_necessaria_barras) / 2
 
         y
-         .range([nova_margem_vertical, h_numerico - nova_margem_vertical])
-         .domain(parametros[categoria].dominios);
+        .range([nova_margem_vertical, h_numerico - nova_margem_vertical])
+        .domain(parametros[categoria].dominios);
 
         const novo_eixo = d3.axisLeft().scale(y);
 
@@ -162,6 +165,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .call(novo_eixo);
 
         rect_principal
+          .attr("height", 0.75 * altura_barras)
+          .attr("width", d => wScale(+d.valor) + 1)
           .transition()
           .duration(duracao)
           .attr("fill", d => color(d[categoria]))
@@ -178,6 +183,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
           
 
     }
+
+    desenha_principal("mutuario")
 
     const $botoes_categorias = d3.selectAll("nav.js--controle-categoria > button");
 
