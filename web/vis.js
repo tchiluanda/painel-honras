@@ -16,13 +16,13 @@ const svg_prin = d3.select("svg.vis-principal");
 
 const margin = {
     top : 10,
-    right : 10,
+    right : 50,
     bottom: 10,
-    left: 120
+    left: 140
 };
 
-const duracao = 1000;
-const cor_padrao = "#444";
+const duracao = 700;
+const cor_padrao = d3.select(":root").style("--cor-escura");
 
 const h = svg_prin.style("height");
 const w = svg_prin.style("width");
@@ -58,7 +58,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         // subtotais[variavel]
 
-        const subtotal = group_by_sum(dados, variavel, "valor", true);
+        const subtotal = group_by_sum(dados, variavel, "valor", variavel != "ano"); 
+        // vai dar true para todas as variáveis, exceto para o "ano", quando não quero ordenar por valor decrescente, mas sim pela ordem dos anos.
 
         const maximo = d3.max(subtotal, d => d.subtotal);
 
@@ -113,14 +114,15 @@ d3.csv("dados/dados.csv").then(function(dados) {
         .call(eixo_y);
 
     let rect_principal = svg_prin
-        .selectAll("rect")
+        .selectAll("rect.honras")
         .data(dados);
 
     const rect_principal_enter = svg_prin
-        .selectAll("rect")
+        .selectAll("rect.honras")
         .data(dados)
         .enter()
         .append("rect")
+        .classed("honras", true)
         .attr("x", w_numerico/2)
         .attr("y", h_numerico/2)
         .attr("width", 0)
@@ -139,22 +141,20 @@ d3.csv("dados/dados.csv").then(function(dados) {
     rect_principal = rect_principal.merge(rect_principal_enter);
 
     function desenha_principal(categoria) {
-        // const color = d3.scaleOrdinal()
-        //     .domain(dominios[categoria])
-        //     .range(d3.schemeTableau10.concat(d3.schemeSet3));
-        color.domain(parametros[categoria].dominios)
 
-        // const y = d3.scaleBand()
-        //     .domain(parametros[categoria].dominios)
-        //     .range([margin.top, +h.slice(0, h.length-2) - margin.bottom]);
+        // ajusta escalas
+
+        color.domain(parametros[categoria].dominios)
 
         let altura_necessaria_barras = altura_barras * parametros[categoria].comprimento;
 
         let nova_margem_vertical = (h_numerico - altura_necessaria_barras) / 2
 
         y
-        .range([nova_margem_vertical, h_numerico - nova_margem_vertical])
-        .domain(parametros[categoria].dominios);
+          .range([nova_margem_vertical, h_numerico - nova_margem_vertical])
+          .domain(parametros[categoria].dominios);
+
+        // atualiza eixo
 
         const novo_eixo = d3.axisLeft().scale(y);
 
@@ -163,6 +163,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .delay(duracao)
           .duration(duracao*2)
           .call(novo_eixo);
+
+        // atualiza os retangulos
 
         rect_principal
           .attr("height", 0.75 * altura_barras)
@@ -177,11 +179,53 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .attr("y", d => y(d[categoria]))
           //.attr("height", y.bandwidth() * 0.75)
           .transition()
-          .delay(duracao*2)
+          .delay(duracao)
           .duration(duracao)
           .attr("fill", cor_padrao)
-          
 
+        // remove as barras de subtotais
+
+        svg_prin.selectAll("rect.subtotais")
+          .remove();
+
+        // inclui as barras de subtotais por cima
+
+        svg_prin.selectAll("rect.subtotais")
+          .data(parametros[categoria].subtotais)
+          .enter()
+          .append("rect")
+          .classed("subtotais", true)
+          .attr("x", d => x(0))
+          .attr("y", d => y(d.categoria))
+          .attr("height", 0.75 * altura_barras)
+          .attr("width", d => wScale(d.subtotal) + 1)
+          .attr("fill", cor_padrao)
+          .attr("stroke", cor_padrao)
+          .attr("stroke-width", 2)
+          .attr("opacity", 0)
+          .transition()
+          .delay(duracao*3)
+          .duration(duracao)
+          .attr("opacity", 1);  
+          
+        // labels
+
+        svg_prin.selectAll("text.principal-labels")
+            .remove()
+
+        svg_prin.selectAll("text.principal-labels")
+            .data(parametros[categoria].subtotais)
+            .enter()
+            .append("text")
+            .classed("principal-labels", true)
+            .attr("x", d => x(d.subtotal) + 5)
+            .attr("y", d => y(d.categoria) + altura_barras/2)
+            .text(d => valor_formatado(d.subtotal))
+            .attr("opacity", 0)
+            .transition()
+            .delay(duracao*3)
+            .duration(duracao)
+            .attr("opacity", 1);        
     }
 
     desenha_principal("mutuario")

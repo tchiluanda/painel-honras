@@ -46,8 +46,17 @@ g.axis .tick line {
     stroke: none;
 }
 
-.axis text {
+text {
     font-family: "Merriweather Sans";
     font-weight: 100;
+}
+
+.axis text {
     color: #555;
 }
+
+text.principal-labels {
+    font-size: 10px;
+    color: var(--cor-escura);
+}
+
