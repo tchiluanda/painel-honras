@@ -29,6 +29,24 @@ names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato",
 
 # processamento inicial ---------------------------------------------------
 
+credor_siglas <- data.frame(
+  Credor = unique(honras$Credor),
+  Credor_sigla = c("Caixa Econômica", 
+                   "BID", 
+                   "BNDES", 
+                   "Banco Mundial",
+                   "Banco do Nordeste",
+                   "Banco do Brasil",
+                   "CAF",
+                   "Credit Suisse (Externo)",
+                   "FONPLATA",
+                   "AFD",
+                   "Credit Suisse (Interno",
+                   "JICA",
+                   "Bank of America"),
+  stringsAsFactors = FALSE
+)
+
 honras_pre <- honras %>%
   select(data = `Data de Vencimento`,
          tipo_divida = `Tipo de Dívida`,
@@ -50,8 +68,14 @@ honras_pre <- honras %>%
          valor = as.numeric(
            str_replace(
              str_replace_all(as.character(valor), "\\.", ""), 
-             ",", "\\."))) %>%
-  arrange(data)
+             ",", "\\.")),
+         mutuario = ifelse(mutuario %in% c("São Paulo", "Rio de Janeiro"),
+                           paste0(mutuario, " (", str_sub(tipo_mutuario, end = -2),")"),
+                           mutuario)) %>%
+  arrange(data) %>%
+  left_join(credor_siglas) %>%
+  rename(Credor_completo = Credor,
+         Credor = Credor_sigla)
 
 
 # empilhamento dos valores ------------------------------------------------
@@ -83,45 +107,34 @@ write.csv(honras_stack, file = "dados/dados.csv", fileEncoding = "UTF-8")
 
 #verificacoes
 
-dados %>% 
+honras_stack %>% 
   group_by(mutuario) %>% 
   summarise(soma = sum(valor)) %>% 
   arrange(desc(soma))
 
-sum(honras_det$valor[honras_det$mutuario=="Rio de Janeiro"]) / sum(honras_det$valor)
-length(unique(honras_det$mutuario))
+sum(honras_stack$valor[honras_stack$mutuario=="Rio de Janeiro (Estado)"]) / sum(honras_stack$valor)
+length(unique(honras_stack$mutuario))
 
-honras_det %>% filter(ano == 2020) %>% group_by(Credor) %>% summarise(sum(valor)) %>% arrange(desc(`sum(valor)`))
+honras_stack %>% filter(ano == 2020) %>% group_by(Credor) %>% summarise(sum(valor)) %>% arrange(desc(`sum(valor)`))
 
-View(honras_det %>% count(data_mes))
+View(honras_stack %>% count(data_mes))
 
 
 # prototipos das viz ------------------------------------------------------
 
 plota_sumario <- function(variavel) {
   
-  quo_var <- sym(variavel)
-  # quo_var <- enquo(variavel) se a entrada for um nome, e não uma string
+  #quo_var <- sym(variavel) se a entrada for uma string, e não um nome (quosure)
+  quo_var <- enquo(variavel) #se a entrada for um nome (quosure), e não uma string
 
-  ggplot(honras_simples_pre %>%
+  ggplot(honras_pre %>%
            group_by(!! quo_var) %>%
            summarise(valor = sum(valor)),
          aes(y = reorder(!! quo_var, valor), x = valor)) +
     geom_col()
 }
 
-plota_sumario("mutuario")
+plota_sumario(mutuario)
 plota_sumario(Credor)
 plota_sumario(tipo_divida)
 plota_sumario(ano)
-
-honras_dupla <- honras_simples_pre %>%
-  mutate(layer = 1) %>%
-  bind_rows(honras_simples_pre) %>%
-  mutate(layer = ifelse(is.na(layer), 2, layer))
-
-ggplot(honras_dupla, aes(x = valor, group = paste(data, tipo_divida, Credor, mutuario))) + 
-  geom_col(position = "stack", aes(y = ifelse(layer == 1, mutuario, NA))) +
-  geom_col(position = "stack", aes(y = ifelse(layer == 2, Credor, NA))) +
-  theme(legend.position = "none") +
-  transition_states(states = layer)
