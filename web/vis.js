@@ -131,7 +131,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             "largura_liquida" : largura_liquida,
             "altura_barras" : altura_barras,
             // escalas: a escala de y depender da categoria selecionada e do svg; as escalas de x e w vão depender só do svg, o seu domínio é o mesmo para qualquer categoria e svg, então já vão ficar definidas aqui.
-            "y_scale" : d3.scaleBand().range(),
+            "y_scale" : d3.scaleBand(),
             "x_scale" : d3.scaleLinear()
                           .domain([0, max_valor])
                           .range([margem.left, w_numerico - margem.right]),
@@ -163,12 +163,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
     function cria_eixos_y(classe_svg) {
         const eixo_y = d3.axisLeft().scale(dimensoes[classe_svg].y_scale);
 
+        console.log(eixo_y)
+
         dimensoes[classe_svg].eixo_y = d3.select("svg.vis-" + classe_svg)
             .append("g") 
                 .classed("axis", true)
                 .classed("y-axis", true)
-                .attr("transform", "translate(" + margin.left + ",-2)")
-            .call(eixo_y[classe]);
+                .attr("transform", "translate(" + margens[classe_svg].left + ",-2)")
+            .call(eixo_y);
     };
 
     classes.forEach(d => cria_eixos_y(d));
@@ -188,8 +190,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .enter()
             .append("rect")
             .classed("honras", true)
-            .attr("x", w_numerico/2)
-            .attr("y", h_numerico/2)
+            .attr("x", dimensoes["principal"].w_numerico/2)
+            .attr("y", dimensoes["principal"].h_numerico/2)
             .attr("width", 0)
             //.attr("height", y.bandwidth() * 0.75)
             .attr("height", 0)
@@ -213,35 +215,49 @@ d3.csv("dados/dados.csv").then(function(dados) {
     ///////////////////////////////////////////////////
     // funcões para desenhar as barras
 
-    function desenha_subtotais(classe_svg, categoria, variavel_destaque, valor_destaque) {
+    function obtem_range_y(classe_svg, categoria) {
+        const altura_necessaria_barras = dimensoes[classe_svg].altura_barras * parametros[categoria].quantidade;
 
-        if (destaque) {
-            const data = group_by_sum(dados
-                .filter(d => d[variavel_destaque] == valor_destaque))
-            const cor_barra = cor_destaque;
-        }
+        const nova_margem_vertical = (dimensoes[classe_svg].h_numerico - altura_necessaria_barras) / 2
+
+        return([nova_margem_vertical, dimensoes[classe_svg].h_numerico - nova_margem_vertical])
+
+    }    
+
+    function desenha_subtotais(classe_svg, categoria) {
+
+        const dados = parametros[categoria].subtotais;
+        const cor_barra = cor_padrao;
+        //const classe_barra = "subtotais"
+
+        const y_scale = dimensoes[classe_svg].y_scale
+          .range(obtem_range_y(classe_svg, categoria))
+          .domain(parametros[categoria].dominios);
+
+        const x_scale = dimensoes[classe_svg].x_scale;
+        const w_scale = dimensoes[classe_svg].w_scale;
         
-        // remove as barras de subtotais
+        // remove as barras de subtotais preexistentes
 
         d3.select("svg.vis-" + classe_svg)
-            .selectAll("rect.subtotais")
+            .selectAll("rect." + classe_svg)
             .remove();
     
         // inclui as barras de subtotais por cima
 
         d3.select("svg.vis-" + classe_svg)
-            .selectAll("rect.subtotais")
-            .data(parametros[categoria].subtotais)
+            .selectAll("rect." + classe_svg)
+            .data(dados)
             .enter()
             .append("rect")
-            .classed(rect_class, true)
+            .classed(classe_svg, true)
             .attr("x", d => x_scale(0))
             .attr("y", d => y_scale(d.categoria))
-            .attr("height", 0.75 * altura_barras)
+            .attr("height", 0.75 * dimensoes[classe_svg].altura_barras)
             .attr("width", d => w_scale(d.subtotal) + 1)
             .attr("fill", cor_padrao)
             .attr("stroke", cor_padrao)
-            .attr("stroke-width", rect_class == "principal" ? 2 : 0)
+            .attr("stroke-width", classe_svg == "principal" ? 2 : 0)
             .attr("opacity", 0)
             .transition()
             .delay(duracao*3)
@@ -250,16 +266,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         // labels
 
-        svg_prin.selectAll("text."+rect_class+"-labels")
+        d3.select("svg.vis-" + classe_svg).selectAll("text."+classe_svg+"-labels")
             .remove()
 
-        svg_prin.selectAll("text."+rect_class+"-labels")
+        d3.select("svg.vis-" + classe_svg).selectAll("text."+classe_svg+"-labels")
             .data(parametros[categoria].subtotais)
             .enter()
             .append("text")
-            .classed(rect_class+"-labels", true)
+            .classed(classe_svg+"-labels", true)
             .attr("x", d => x_scale(d.subtotal) + 5)
-            .attr("y", d => y_scale(d.categoria) + altura_barras/2)
+            .attr("y", d => y_scale(d.categoria) + dimensoes[classe_svg].altura_barras/2)
             .text(d => valor_formatado(d.subtotal))
             .attr("opacity", 0)
             .transition()
@@ -269,10 +285,18 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     }
 
-    function define_eixo_y(categoria, classe_svg) {
-        // preciso dessa função pq o eixo_y vai depennder da categoria selecionada (mutuário, credor etc.) -- o que vai afetar o domínio, e do svg onde ele vai ser usado, o que vai afetar o range.
+    function desenha_destaques(classe_svg, variavel_destaque, valor_destaque) {
+
+        data = group_by_sum(dados
+            .filter(d => d[variavel_destaque] == valor_destaque))
+        cor_barra = cor_destaque;
+        classe_barra = "destaque";
+
     }
 
+    function define_eixo_y(categoria, classe_svg) {
+        // preciso dessa função pq o eixo_y vai depender da categoria selecionada (mutuário, credor etc.) -- o que vai afetar o domínio, e do svg onde ele vai ser usado, o que vai afetar o range.
+    }
 
     function desenha_principal(categoria) {
 
@@ -280,19 +304,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         color.domain(parametros[categoria].dominios)
 
-        let altura_necessaria_barras = altura_barras * parametros[categoria].quantidade;
-
-        let nova_margem_vertical = (h_numerico - altura_necessaria_barras) / 2
-
         const y = d3.scaleBand()
-          .range([nova_margem_vertical, h_numerico - nova_margem_vertical])
+          .range(obtem_range_y("principal", categoria))
           .domain(parametros[categoria].dominios);
 
         // atualiza eixo
 
         const novo_eixo = d3.axisLeft().scale(y);
 
-        $eixo_y
+        d3.select("svg.vis-principal")
+          .select("g.axis")
           .transition()
           .delay(duracao)
           .duration(duracao*2)
@@ -301,15 +322,15 @@ d3.csv("dados/dados.csv").then(function(dados) {
         // atualiza os retangulos
 
         rects_honras
-          .attr("height", 0.75 * altura_barras)
-          .attr("width", d => wScale(+d.valor) + 1)
+          .attr("height", 0.75 * dimensoes["principal"].altura_barras)
+          .attr("width", d => dimensoes["principal"].w_scale(+d.valor) + 1)
           .transition()
           .duration(duracao)
           .attr("fill", d => color(d[categoria]))
           .transition()
           .delay(duracao)
           .duration(duracao)
-          .attr("x", d => x(+d["pos_ini_"+categoria]))
+          .attr("x", d => dimensoes["principal"].x_scale(+d["pos_ini_"+categoria]))
           .attr("y", d => y(d[categoria]))
           //.attr("height", y.bandwidth() * 0.75)
           .transition()
@@ -317,7 +338,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .duration(duracao)
           .attr("fill", cor_padrao)
 
-        desenha_subtotais();
+        desenha_subtotais("principal", categoria);
        
     }
 
