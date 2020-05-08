@@ -8,9 +8,25 @@ div.vis-container {
       "vis-timeline vis-timeline";
     max-width: 1080px;
     margin: 0 auto;
+    grid-gap: 5px;
+    gap: 5px;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1080px) and (min-width: 580px) {
+    div.vis-container {
+        grid-template-rows: 2fr 1.5fr 1fr;
+        grid-template-columns: 50% 50%;
+        grid-template-areas:
+        "vis-principal vis-principal"
+        "vis-auxiliar1 vis-auxiliar2"
+        "vis-timeline vis-timeline";
+        gap: 0;
+        grid-gap: 0;
+
+    }
+}
+
+@media (max-width: 579px) {
     div.vis-container {
         grid-template-rows: 2fr 1.5fr 1.5fr 1fr;
         grid-template-columns: 100%;
@@ -23,7 +39,7 @@ div.vis-container {
 }
 
 svg {
-    outline: 1px solid coral;
+    /*outline: 1px solid coral;*/
     width: 100%;
     height: 100%;
 }
@@ -44,6 +60,13 @@ svg.vis-timeline {
     grid-area: vis-timeline;
 
 }
+
+svg.vis-auxiliar1, svg.vis-auxiliar2 {
+    box-shadow: 2px 2px 5px #888;
+    background-color: ghostwhite;
+    border: 1px solid #444;
+}
+
 
 .axis line,
 .axis path {
