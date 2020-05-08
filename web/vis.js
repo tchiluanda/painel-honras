@@ -58,7 +58,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     };
 
-    console.log(parametros);
+    //console.log(parametros);
 
     ///////////////////////////////////////////////////
     // parâmetros gerais
@@ -102,10 +102,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
         },
 
         timeline : {
-            top : 10,
+            top : 20,
             right: 20,
-            bottom: 10,
-            left: 20
+            bottom: 30,
+            left: 40
         }
     };
 
@@ -152,6 +152,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     }
 
     dimensiona_vis();
+    console.log(dimensoes["timeline"]);
 
     //console.log(dimensoes);   
 
@@ -194,7 +195,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     function cria_eixos_y(classe_svg) {
         const eixo_y = d3.axisLeft().scale(dimensoes[classe_svg].y_scale);
 
-        console.log(eixo_y)
+        //console.log(eixo_y)
 
         dimensoes[classe_svg].eixo_y = d3.select("svg.vis-" + classe_svg)
             .append("g") 
@@ -270,10 +271,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     function desenha_subtotais(classe_svg, categoria) {
 
-        console.log(classe_svg, categoria);
+        //console.log(classe_svg, categoria);
 
         const dados = parametros[categoria].subtotais;
-        console.log("dados dentro de subtotais", categoria, dados)
+        //console.log("dados dentro de subtotais", categoria, dados)
         const cor_barra = cor_padrao;
         //const classe_barra = "subtotais"
 
@@ -390,6 +391,76 @@ d3.csv("dados/dados.csv").then(function(dados) {
        
     }
 
+    function desenha_timeline() {
+        let dados_linha = group_by_sum(dados, "data_mes", "valor", false);
+
+
+        dados_linha.forEach((d,i) => {
+            dados_linha[i]["data"] = d3.timeParse("%Y-%m-%d")(d.categoria);
+        });
+
+        console.log(dados_linha);
+
+        const valor_linha_max = d3.max(dados_linha, d => +d.subtotal);
+
+        const y_scale = d3.scaleLinear()
+            .range([dimensoes["timeline"].h_numerico - margens["timeline"].bottom, margens["timeline"].bottom])
+            .domain([0, valor_linha_max]);
+
+        const x_scale = d3.scaleTime()
+            .range([margens["timeline"].left, dimensoes["timeline"].w_numerico - margens["timeline"].right])
+            .domain(d3.extent(dados_linha, d => d.data));
+
+        console.log(x_scale.range(), y_scale.range());
+
+        const gerador_linha = d3.line()
+            .x(d => x_scale(d.data))
+            .y(d => y_scale(d.subtotal))
+            .curve(d3.curveCatmullRom.alpha(0.5));
+
+        console.log(dados_linha.map(d => y_scale(d.subtotal)));
+
+        d3.select("svg.vis-timeline")
+            .append("path")
+            .attr("d", gerador_linha(dados_linha))
+            .attr("fill", "none")
+            .attr("stroke-width", "2px")
+            .attr("stroke", "var(--cor-escura)");
+
+        let eixo_x = d3.axisBottom()
+            .scale(x_scale)
+            .tickFormat(d => formataData(d))
+            .ticks(d3.timeMonth.every(4));
+
+        d3.select("svg.vis-timeline")
+            .append("g") 
+            .attr("class", "axis x-axis")
+            .attr("transform", "translate(0," + (dimensoes["timeline"].h_numerico - margens["timeline"].bottom) + ")")
+            .call(eixo_x);
+
+        let eixo_y = d3.axisLeft()
+            .scale(y_scale)
+            .tickFormat(d => formataBR(d/1e6))
+            .ticks(3);
+
+        d3.select("svg.vis-timeline")
+            .append("g") 
+            .classed("axis", true)
+            .classed("y-axis-timeline", true)
+            .attr("transform", "translate(" + margens["timeline"].left + ",0)")
+            .call(eixo_y);
+
+        d3.select("svg.vis-timeline")
+            .select(".y-axis-timeline .tick:last-of-type text").clone()
+            .attr("x", 5)
+            .attr("text-anchor", "start")
+            .style("font-weight", "bold")
+            .classed("timeline-titulo-eixoY", true)
+            .text("Valores mensais (R$ mi)");
+    }
+
+    desenha_timeline();
+
     function desenha_estado_atual(opcao) {
         desenha_principal(opcao);
         desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
@@ -416,7 +487,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     const $botoes_categorias = d3.selectAll("nav.js--controle-categoria > button");
 
-    console.log($botoes_categorias);
+    //console.log($botoes_categorias);
 
     $botoes_categorias.on("click", function(){
      

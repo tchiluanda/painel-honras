@@ -77,7 +77,7 @@ svg.vis-auxiliar1, svg.vis-auxiliar2 {
     stroke: none;
 }
 
-g.axis .tick line {
+g.y-axis .tick line {
     stroke: none;
 }
 
