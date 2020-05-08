@@ -91,14 +91,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
             top : 8,
             right: 30,
             bottom: 8,
-            left: 88
+            left: 90
         },
 
         auxiliar2 : { 
             top : 8,
             right: 30,
             bottom: 8,
-            left: 88
+            left: 90
         },
 
         timeline : {
@@ -312,7 +312,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .attr("stroke-width", classe_svg == "principal" ? 2 : 0)
             .attr("opacity", 0)
             .transition()
-            .delay(duracao*3)
+            .delay(duracao*4)
             .duration(duracao)
             .attr("opacity", 1);  
         
@@ -377,13 +377,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .attr("fill", d => color(d[categoria]))
           .transition()
           .delay(duracao)
-          .duration(duracao)
+          .duration(duracao*1.5)
           .attr("x", d => dimensoes["principal"].x_scale(+d["pos_ini_"+categoria]))
           .attr("y", d => y_scale(d[categoria]))
           //.attr("height", y.bandwidth() * 0.75)
           .transition()
-          .delay(duracao)
-          .duration(duracao)
+          .delay(duracao*1.5)
+          .duration(duracao*1.5)
           .attr("fill", cor_padrao)
 
         desenha_subtotais("principal", categoria);
@@ -435,5 +435,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
     // listener do resize
 
     window.addEventListener('resize', debounce(resize_init, 500));
+
+    // d3.select("svg.vis-principal").selectAll("rect.principal").on("click", function(){console.log(d3.select(this).data())})
+
+    // d3.select("svg.vis-principal").selectAll("g.axis text").attr("fill", (d,i) => d == "Goiás" ? "coral" : "blue")
 
 })
