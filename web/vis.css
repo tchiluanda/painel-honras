@@ -10,6 +10,18 @@ div.vis-container {
     margin: 0 auto;
 }
 
+@media (max-width: 1080px) {
+    div.vis-container {
+        grid-template-rows: 2fr 1.5fr 1.5fr 1fr;
+        grid-template-columns: 100%;
+        grid-template-areas:
+        "vis-principal"
+        "vis-auxiliar1"
+        "vis-auxiliar2"
+        "vis-timeline";
+    }
+}
+
 svg {
     outline: 1px solid coral;
     width: 100%;
