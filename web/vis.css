@@ -60,3 +60,10 @@ text.principal-labels {
     color: var(--cor-escura);
 }
 
+.axis.auxiliar1 text,
+.axis.auxiliar2 text,
+text.auxiliar1-labels,
+text.auxiliar2-labels {
+    font-size: 7px;
+}
+

@@ -87,17 +87,17 @@ d3.csv("dados/dados.csv").then(function(dados) {
         },
         
         auxiliar1 : { 
-            top : 10,
-            right: 20,
-            bottom: 10,
-            left: 60
+            top : 8,
+            right: 30,
+            bottom: 8,
+            left: 88
         },
 
         auxiliar2 : { 
-            top : 10,
-            right: 20,
-            bottom: 10,
-            left: 60
+            top : 8,
+            right: 30,
+            bottom: 8,
+            left: 88
         },
 
         timeline : {
@@ -148,7 +148,34 @@ d3.csv("dados/dados.csv").then(function(dados) {
         dimensoes[classe] = pega_dimensoes(classe)
     }
 
-    console.log(dimensoes);    
+    console.log(dimensoes);   
+
+    ///////////////////////////////////////////////////
+    // estados
+    const estado = {
+    
+        mutuario : {
+            auxiliar1 : "Credor",
+            auxiliar2 : "tipo_divida"
+        },
+
+        Credor : {
+            auxiliar1 : "mutuario",
+            auxiliar2 : "tipo_divida"
+        },
+
+        tipo_divida : {
+            auxiliar1 : "mutuario",
+            auxiliar2 : "Credor"
+        },
+
+        ano : {
+            auxiliar1 : "mutuario",
+            auxiliar2 : "Credor"
+        }
+
+    }    
+    
 
 
     ///////////////////////////////////////////////////
@@ -222,17 +249,38 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         return([nova_margem_vertical, dimensoes[classe_svg].h_numerico - nova_margem_vertical])
 
-    }    
+    } 
+    
+    function desenha_eixo_y(classe_svg, y_scale) {
+        // preciso dessa função pq o eixo_y vai depender da categoria selecionada (mutuário, credor etc.) -- o que vai afetar o domínio, e do svg onde ele vai ser usado, o que vai afetar o range.
+        const novo_eixo = d3.axisLeft().scale(y_scale);
+
+        d3.select("svg.vis-" + classe_svg)
+          .select("g.axis")
+          .classed(classe_svg, true)
+          .transition()
+          .delay(duracao)
+          .duration(duracao*2)
+          .call(novo_eixo);
+    }
 
     function desenha_subtotais(classe_svg, categoria) {
 
+        console.log(classe_svg, categoria);
+
         const dados = parametros[categoria].subtotais;
+        console.log("dados dentro de subtotais", categoria, dados)
         const cor_barra = cor_padrao;
         //const classe_barra = "subtotais"
 
         const y_scale = dimensoes[classe_svg].y_scale
           .range(obtem_range_y(classe_svg, categoria))
           .domain(parametros[categoria].dominios);
+
+        // se a função estiver sendo chamada para desenhar os gráficos auxiliares, será preciso criar / atualizar um novo eixo.
+        if (classe_svg != "principal") {
+            desenha_eixo_y(classe_svg, y_scale);
+        }
 
         const x_scale = dimensoes[classe_svg].x_scale;
         const w_scale = dimensoes[classe_svg].w_scale;
@@ -294,23 +342,19 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     }
 
-    function define_eixo_y(categoria, classe_svg) {
-        // preciso dessa função pq o eixo_y vai depender da categoria selecionada (mutuário, credor etc.) -- o que vai afetar o domínio, e do svg onde ele vai ser usado, o que vai afetar o range.
-    }
-
     function desenha_principal(categoria) {
 
         // ajusta escalas
 
         color.domain(parametros[categoria].dominios)
 
-        const y = d3.scaleBand()
+        const y_scale = d3.scaleBand()
           .range(obtem_range_y("principal", categoria))
           .domain(parametros[categoria].dominios);
 
         // atualiza eixo
 
-        const novo_eixo = d3.axisLeft().scale(y);
+        const novo_eixo = d3.axisLeft().scale(y_scale);
 
         d3.select("svg.vis-principal")
           .select("g.axis")
@@ -331,7 +375,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .delay(duracao)
           .duration(duracao)
           .attr("x", d => dimensoes["principal"].x_scale(+d["pos_ini_"+categoria]))
-          .attr("y", d => y(d[categoria]))
+          .attr("y", d => y_scale(d[categoria]))
           //.attr("height", y.bandwidth() * 0.75)
           .transition()
           .delay(duracao)
@@ -358,5 +402,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
       console.log(opcao, this.id, this);
 
       desenha_principal(opcao);
+      desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
+      desenha_subtotais("auxiliar2", estado[opcao].auxiliar2);
     })
 })
