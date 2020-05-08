@@ -4,21 +4,22 @@ const $qde_honras  = d3.select("strong.js--qde-honras");
 ///////////////////////////////////////////////////
 // define tamanho do container do grid
 
-const altura_logo = d3.select("header.logo").node().offsetHeight;
-const altura_header = d3.select("main>header").node().offsetHeight;
-const altura_nav = d3.select("div.grupo-controles").node().offsetHeight;
-const altura_janela = window.innerHeight;
+function dimensiona_container() {
+    let altura_logo = d3.select("header.logo").node().offsetHeight;
+    let altura_header = d3.select("main>header").node().offsetHeight;
+    let altura_nav = d3.select("div.grupo-controles").node().offsetHeight;
+    let altura_janela = window.innerHeight;
 
-const altura_container_vis = altura_janela - altura_logo - altura_header - altura_nav;
-// atenção! a margen não entra nesse cálculo, então é importante zerar as margens verticais entre os elementos sendo medidos.
-//console.log(altura_container_vis);
-d3.select(".vis-container").style("height", altura_container_vis + "px");
+    let altura_container_vis = altura_janela - altura_logo - altura_header - altura_nav;
+    // atenção! a margen não entra nesse cálculo, então é importante zerar as margens verticais entre os elementos sendo medidos.
+    //console.log(altura_container_vis);
+    d3.select(".vis-container").style("height", altura_container_vis + "px");
+}
+
+dimensiona_container();
 
 // agora temos as dimensoes necessarias para cada svg nesse objeto `dimensoes`
 
-function init() {
-
-}
 
 d3.csv("dados/dados.csv").then(function(dados) {
     console.log(dados.columns);
@@ -144,11 +145,15 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     const dimensoes = {};
 
-    for (classe of classes) {
-        dimensoes[classe] = pega_dimensoes(classe)
+    function dimensiona_vis() {
+        for (classe of classes) {
+            dimensoes[classe] = pega_dimensoes(classe)
+        }
     }
 
-    console.log(dimensoes);   
+    dimensiona_vis();
+
+    //console.log(dimensoes);   
 
     ///////////////////////////////////////////////////
     // estados
@@ -174,8 +179,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             auxiliar2 : "Credor"
         }
 
-    }    
-    
+    }   
 
 
     ///////////////////////////////////////////////////
@@ -386,7 +390,29 @@ d3.csv("dados/dados.csv").then(function(dados) {
        
     }
 
-    desenha_principal("mutuario")
+    function desenha_estado_atual(opcao) {
+        desenha_principal(opcao);
+        desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
+        desenha_subtotais("auxiliar2", estado[opcao].auxiliar2);
+    }
+
+    //////////////////////
+    // para dar início!
+
+    let ultimo_estado = "mutuario";
+
+    // fiz essa função para poder amarrar um listener de tamanho da janela;
+
+    function resize_init() {
+        dimensiona_container();
+        dimensiona_vis();
+        desenha_estado_atual(ultimo_estado);
+    }
+
+    desenha_estado_atual(ultimo_estado);
+
+    ///////////////////////
+    // listener dos botões
 
     const $botoes_categorias = d3.selectAll("nav.js--controle-categoria > button");
 
@@ -399,10 +425,15 @@ d3.csv("dados/dados.csv").then(function(dados) {
       $botoes_categorias.classed("selected", false);
       d3.select(this).classed("selected", true);
 
-      console.log(opcao, this.id, this);
+      //console.log(opcao, this.id, this);
+      ultimo_estado = opcao;
 
-      desenha_principal(opcao);
-      desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
-      desenha_subtotais("auxiliar2", estado[opcao].auxiliar2);
-    })
+      desenha_estado_atual(opcao)
+    });
+
+    ///////////////////////
+    // listener do resize
+
+    window.addEventListener('resize', debounce(resize_init, 500));
+
 })

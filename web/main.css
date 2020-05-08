@@ -41,7 +41,8 @@ header img.logo-tt {
 main > header {
     color: var(--cor-fonte);
     font-family: var(--fonte-sem-serifa);
-    padding: 1rem 0 2rem;
+    padding: 1rem 0 1rem;
+    text-align: center;
 }
 
 main > header > h1 {
