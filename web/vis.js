@@ -320,7 +320,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .attr("stroke-width", classe_svg == "principal" ? 2 : 0)
             .attr("opacity", 0)
             .transition()
-            .delay(duracao*4)
+            .delay(duracao*3.5)
             .duration(duracao)
             .attr("opacity", 1);  
         
@@ -339,7 +339,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .text(d => valor_formatado(d.subtotal))
             .attr("opacity", 0)
             .transition()
-            .delay(duracao*3)
+            .delay(duracao*3.5)
             .duration(duracao)
             .attr("opacity", 1); 
 
@@ -385,12 +385,12 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .attr("fill", d => color(d[categoria]))
           .transition()
           .delay(duracao)
-          .duration(duracao*1.5)
+          .duration(duracao*2)
           .attr("x", d => dimensoes["principal"].x_scale(+d["pos_ini_"+categoria]))
           .attr("y", d => y_scale(d[categoria]))
           //.attr("height", y.bandwidth() * 0.75)
           .transition()
-          .delay(duracao*1.5)
+          .delay(duracao*2)
           .duration(duracao*1.5)
           .attr("fill", cor_padrao)
 
@@ -398,50 +398,77 @@ d3.csv("dados/dados.csv").then(function(dados) {
        
     }
 
-    function desenha_timeline() {
-        let dados_linha = group_by_sum(dados, "data_mes", "valor", false);
+    let for_the_first_time_in_forever = true;
 
+    function inicializa_timeline() {
+        let dados_linha = group_by_sum(dados, "data_mes", "valor", false);
 
         dados_linha.forEach((d,i) => {
             dados_linha[i]["data"] = d3.timeParse("%Y-%m-%d")(d.categoria);
         });
 
-        console.log(dados_linha);
-
         const valor_linha_max = d3.max(dados_linha, d => +d.subtotal);
 
-        const y_scale = d3.scaleLinear()
-            .range([dimensoes["timeline"].h_numerico - margens["timeline"].bottom, margens["timeline"].bottom])
-            .domain([0, valor_linha_max]);
+        let y_scale = d3.scaleLinear().domain([0, valor_linha_max]);
+        let x_scale = d3.scaleTime().domain(d3.extent(dados_linha, d => d.data));
 
-        const x_scale = d3.scaleTime()
-            .range([margens["timeline"].left, dimensoes["timeline"].w_numerico - margens["timeline"].right])
-            .domain(d3.extent(dados_linha, d => d.data));
+        $linha = d3.select("svg.vis-timeline")
+          .append("path")
+          .attr("fill", "none")
+          .attr("stroke-width", "2px")
+          .attr("stroke", "var(--cor-escura)");   
+          
+        $eixo_x = d3.select("svg.vis-timeline")
+          .append("g") 
+          .classed("axis", true)
+          .classed("x-axis-timeline", true);
 
-        console.log(x_scale.range(), y_scale.range());
+        $eixo_y = d3.select("svg.vis-timeline")
+          .append("g") 
+          .classed("axis", true)
+          .classed("y-axis-timeline", true);
 
+        //console.log("2. Função chamada, definiu o domain (sem atualizar a variável)", y_scale, y_scale.domain());
+
+        return([y_scale, x_scale, $linha, $eixo_x, $eixo_y, dados_linha]);
+    }
+
+    function desenha_timeline() {
+
+        //console.log("1. Só defini com d3.scaleLinear()", y_scale)
+
+        if (for_the_first_time_in_forever) {
+            [y_scale, x_scale, $linha, $eixo_x, $eixo_y, dados_linha] = inicializa_timeline();
+            for_the_first_time_in_forever = false;
+        }
+
+        //console.log("3. Agora tô fora, enxergo o y_scale atualizado?", y_scale, y_scale.domain());
+
+        y_scale.range([dimensoes["timeline"].h_numerico - margens["timeline"].bottom, margens["timeline"].bottom]);
+
+        //console.log("4. Agora defini o range, enxergo o y_scale atualizado?", y_scale, y_scale.domain(), y_scale.range());
+
+        x_scale.range([margens["timeline"].left, dimensoes["timeline"].w_numerico - margens["timeline"].right]);
+            
         const gerador_linha = d3.line()
             .x(d => x_scale(d.data))
             .y(d => y_scale(d.subtotal))
             .curve(d3.curveCatmullRom.alpha(0.5));
 
-        console.log(dados_linha.map(d => y_scale(d.subtotal)));
-
-        d3.select("svg.vis-timeline")
-            .append("path")
-            .attr("d", gerador_linha(dados_linha))
-            .attr("fill", "none")
-            .attr("stroke-width", "2px")
-            .attr("stroke", "var(--cor-escura)");
+        $linha
+            .attr("d", gerador_linha(dados_linha));
 
         let eixo_x = d3.axisBottom()
-            .scale(x_scale)
-            .tickFormat(d => formataData(d))
-            .ticks(d3.timeMonth.every(4));
+            .scale(x_scale);
 
-        d3.select("svg.vis-timeline")
-            .append("g") 
-            .attr("class", "axis x-axis")
+        if (dimensoes["timeline"].w_numerico < 6000)
+            eixo_x = eixo_x.tickFormat(d => formataData_Anos(d))
+                           .ticks(d3.timeYear.every(1));
+        else
+            eixo_x = eixo_x.tickFormat(d => formataData(d))
+                           .ticks(d3.timeMonth.every(4));
+
+        $eixo_x
             .attr("transform", "translate(0," + (dimensoes["timeline"].h_numerico - margens["timeline"].bottom) + ")")
             .call(eixo_x);
 
@@ -450,13 +477,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .tickFormat(d => formataBR(d/1e6))
             .ticks(3);
 
-        d3.select("svg.vis-timeline")
-            .append("g") 
-            .classed("axis", true)
-            .classed("y-axis-timeline", true)
+        $eixo_y
             .attr("transform", "translate(" + margens["timeline"].left + ",0)")
             .call(eixo_y);
 
+            
+
+        if (d3.select("svg.vis-timeline").select(".timeline-titulo-eixoY").nodes().length != 0) {
+            d3.select("svg.vis-timeline").select(".timeline-titulo-eixoY").remove();
+        }
+      
         d3.select("svg.vis-timeline")
             .select(".y-axis-timeline .tick:last-of-type text").clone()
             .attr("x", 5)
