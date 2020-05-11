@@ -299,30 +299,34 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         // remove as barras de subtotais preexistentes
 
-        d3.select("svg.vis-" + classe_svg)
+        let barras_subtotais = d3.select("svg.vis-" + classe_svg)
             .selectAll("rect." + classe_svg)
+            .data(dados, d => d.categoria);
+
+        barras_subtotais
+            .exit()
             .remove();
     
         // inclui as barras de subtotais por cima
+        // as lógicas tratam quando as barras de subtotais estão nos paineis auxiliares. nesses casos, não caro que apareçam, mas que cresçam (como efeito de entrada)
 
-        d3.select("svg.vis-" + classe_svg)
-            .selectAll("rect." + classe_svg)
-            .data(dados)
+        barras_subtotais
             .enter()
             .append("rect")
             .classed(classe_svg, true)
             .attr("x", d => x_scale(0))
             .attr("y", d => y_scale(d.categoria))
             .attr("height", 0.75 * dimensoes[classe_svg].altura_barras)
-            .attr("width", d => w_scale(d.subtotal) + 1)
+            .attr("width", d => classe_svg != "principal" ? 0 : w_scale(d.subtotal) + 1)
             .attr("fill", cor_padrao)
             .attr("stroke", cor_padrao)
             .attr("stroke-width", classe_svg == "principal" ? 2 : 0)
-            .attr("opacity", 0)
+            .attr("opacity", d => classe_svg != "principal" ? 1 : 0)
             .transition()
             .delay(duracao*3.5)
             .duration(duracao)
-            .attr("opacity", 1);  
+            .attr("opacity", 1)
+            .attr("width", d => w_scale(d.subtotal) + 1);
         
         // labels
 
@@ -342,15 +346,6 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .delay(duracao*3.5)
             .duration(duracao)
             .attr("opacity", 1); 
-
-    }
-
-    function desenha_destaques(classe_svg, variavel_destaque, valor_destaque) {
-
-        data = group_by_sum(dados
-            .filter(d => d[variavel_destaque] == valor_destaque))
-        cor_barra = cor_destaque;
-        classe_barra = "destaque";
 
     }
 
@@ -517,6 +512,28 @@ d3.csv("dados/dados.csv").then(function(dados) {
     }
 
     desenha_estado_atual(ultimo_estado);
+
+    ///////////////////////
+    // destaques
+
+    function destaca_selecao(selecao) {
+
+        // barra_destacada = d3.select("svg.vis-principal").select(selecao);
+
+
+        // d3.select("svg.vis-principal").selectAll("g.axis text").attr("fill", (d,i) => i == 4 ? "red" : "blue")
+
+
+    }
+
+    function desenha_destaques(classe_svg, variavel_destaque, valor_destaque) {
+
+        data = group_by_sum(dados
+            .filter(d => d[variavel_destaque] == valor_destaque))
+        cor_barra = cor_destaque;
+        classe_barra = "destaque";
+
+    }
 
     ///////////////////////
     // listener dos botões
