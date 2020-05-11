@@ -20,6 +20,10 @@ body, p {
     margin: 0;
 }
 
+header {
+    position: relative;
+}
+
 header.logo {
     width: 100%;
     background-color: var(--cor-escura);
@@ -28,10 +32,23 @@ header.logo {
     margin: 0;
 }
 
-header img.logo-tt {
+/* header img.logo-tt {
     display: block;
     margin-left: auto;
     margin-right: auto;
+} */
+
+header > h1 {
+    display: inline;
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-family: var(--fonte-serifa);
+    color: var(--cor-fundo);
+    transform: translate(-50%, -50%);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: 0;
 }
 
 .centralizado {
@@ -45,17 +62,6 @@ main > header {
     padding: 1rem 0 1rem;
     text-align: center;
 }
-
-main > header > h1 {
-    font-size: 1.5rem;
-    font-weight: 900;
-    margin-top: 0rem;
-    margin-bottom: 0.5rem;
-    font-family: var(--fonte-serifa);
-    /*color: var(--cor-escura);*/
-}
-
-
 
 nav.controle-vis {
     display: flex;
