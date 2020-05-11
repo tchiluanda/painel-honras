@@ -61,7 +61,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     };
 
-    //console.log(parametros);
+    console.log(parametros);
 
     ///////////////////////////////////////////////////
     // parâmetros gerais
@@ -323,17 +323,19 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .attr("stroke-width", classe_svg == "principal" ? 2 : 0)
             .attr("opacity", d => classe_svg != "principal" ? 1 : 0)
             .transition()
-            .delay(duracao*3.5)
+            .delay(duracao*4)
             .duration(duracao)
             .attr("opacity", 1)
             .attr("width", d => w_scale(d.subtotal) + 1);
         
         // labels
 
-        d3.select("svg.vis-" + classe_svg).selectAll("text."+classe_svg+"-labels")
-            .remove()
+        d3.select("svg.vis-" + classe_svg)
+            .selectAll("text."+classe_svg+"-labels")
+            .remove();
 
-        d3.select("svg.vis-" + classe_svg).selectAll("text."+classe_svg+"-labels")
+        d3.select("svg.vis-" + classe_svg)
+            .selectAll("text."+classe_svg+"-labels")            
             .data(parametros[categoria].subtotais)
             .enter()
             .append("text")
@@ -343,7 +345,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .text(d => valor_formatado(d.subtotal))
             .attr("opacity", 0)
             .transition()
-            .delay(duracao*3.5)
+            .delay(duracao*4)
             .duration(duracao)
             .attr("opacity", 1); 
 
