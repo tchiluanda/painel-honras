@@ -6,13 +6,16 @@ const $qde_honras  = d3.select("strong.js--qde-honras");
 
 function dimensiona_container() {
     let altura_logo = d3.select("header.logo").node().offsetHeight;
-    let altura_header = d3.select("main>header").node().offsetHeight;
+    //let altura_header = d3.select("main>header").node().offsetHeight;
     let altura_nav = d3.select("div.grupo-controles").node().offsetHeight;
     let altura_janela = window.innerHeight;
 
-    let altura_container_vis = altura_janela - altura_logo - altura_header - altura_nav;
+    let altura_container_vis = altura_janela - altura_logo - altura_nav; //- altura_header 
     // atenção! a margen não entra nesse cálculo, então é importante zerar as margens verticais entre os elementos sendo medidos.
     //console.log(altura_container_vis);
+
+    altura_container_vis = window.innerWidth < 1080 ? altura_container_vis * 1.5 : altura_container_vis;
+
     d3.select(".vis-container").style("height", altura_container_vis + "px");
 }
 
@@ -89,16 +92,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         auxiliar1 : { 
             top : 8,
-            right: 30,
+            right: 35,
             bottom: 8,
-            left: 90
+            left: 100
         },
 
         auxiliar2 : { 
             top : 8,
-            right: 30,
+            right: 35,
             bottom: 8,
-            left: 90
+            left: 100
         },
 
         timeline : {
@@ -463,12 +466,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .text("Valores mensais (R$ mi)");
     }
 
-    desenha_timeline();
-
     function desenha_estado_atual(opcao) {
         desenha_principal(opcao);
         desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
         desenha_subtotais("auxiliar2", estado[opcao].auxiliar2);
+        desenha_timeline();
     }
 
     //////////////////////
