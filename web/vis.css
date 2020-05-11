@@ -62,9 +62,8 @@ svg.vis-timeline {
 }
 
 svg.vis-auxiliar1, svg.vis-auxiliar2 {
-    box-shadow: 2px 2px 5px #888;
-    background-color: ghostwhite;
-    border: 1px solid #444;
+    border: 1px solid var(--cor-clara);
+    border-radius: .5em;
 }
 
 
@@ -102,3 +101,6 @@ text.auxiliar2-labels {
     font-size: 7px;
 }
 
+rect.auxiliar1, rect.auxiliar2 {
+    fill: #CF78AF;
+}
