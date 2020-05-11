@@ -250,9 +250,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
     function obtem_range_y(classe_svg, categoria) {
         const altura_necessaria_barras = dimensoes[classe_svg].altura_barras * parametros[categoria].quantidade;
 
-        const nova_margem_vertical = (dimensoes[classe_svg].h_numerico - altura_necessaria_barras) / 2
+        //const nova_margem_vertical = (dimensoes[classe_svg].h_numerico - altura_necessaria_barras) / 2
 
-        return([nova_margem_vertical, dimensoes[classe_svg].h_numerico - nova_margem_vertical])
+        //return([nova_margem_vertical, dimensoes[classe_svg].h_numerico - nova_margem_vertical])
+
+        const nova_margem_vertical_inferior = dimensoes[classe_svg].h_numerico - altura_necessaria_barras - margens[classe_svg].top;
+
+        return([margens[classe_svg].top, dimensoes[classe_svg].h_numerico - nova_margem_vertical_inferior]);
 
     } 
     
