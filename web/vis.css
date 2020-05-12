@@ -115,9 +115,10 @@ rect.subtotais.nao-destacado {
 }
 
 rect.auxiliar1.destaques,
-rect.auxiliar2.destaques {
+rect.auxiliar2.destaques,
+path.timeline-destaque {
     fill: var(--cor-escura);
-    stroke: var(--cor-cinza-escura);
+    stroke: var(--cor-escura);
 }
 
 .axis.auxiliar1 text,

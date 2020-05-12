@@ -105,9 +105,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
         },
 
         timeline : {
-            top : 20,
+            top : 10,
             right: 20,
-            bottom: 30,
+            bottom: 20,
             left: 40
         }
     };
@@ -393,6 +393,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     }
 
     let for_the_first_time_in_forever = true;
+    let parametros_timeline = {};
 
     function inicializa_timeline() {
         let dados_linha = group_by_sum(dados, "data_mes", "valor", false);
@@ -410,7 +411,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .append("path")
           .attr("fill", "none")
           .attr("stroke-width", "2px")
-          .attr("stroke", "var(--cor-escura)");   
+          .attr("stroke", "var(--cor-clara)");   
           
         $eixo_x = d3.select("svg.vis-timeline")
           .append("g") 
@@ -475,7 +476,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .attr("transform", "translate(" + margens["timeline"].left + ",0)")
             .call(eixo_y);
 
-            
+        parametros_timeline["x_scale"] = x_scale;
+        parametros_timeline["y_scale"] = y_scale;
+          
 
         if (d3.select("svg.vis-timeline").select(".timeline-titulo-eixoY").nodes().length != 0) {
             d3.select("svg.vis-timeline").select(".timeline-titulo-eixoY").remove();
@@ -492,6 +495,56 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     ///////////////////////
     // destaques
+
+    function desenha_destaque_timeline(dados_filtrados) {
+
+        let dados_linha = group_by_sum(dados_filtrados, "data_mes", "valor", false);
+        dados_linha.forEach((d,i) => {
+            dados_linha[i]["data"] = d3.timeParse("%Y-%m-%d")(d.categoria);
+        });
+
+        let x_scale = parametros_timeline["x_scale"];
+        let y_scale = parametros_timeline["y_scale"];
+
+        const gerador_area_destaque = d3.area()
+            .x(d => x_scale(d.data))
+            .y0(d => y_scale(0))
+            .y1(d => y_scale(d.subtotal))
+            .curve(d3.curveCatmullRom.alpha(0.5));
+
+        //console.log(gerador_area_destaque(dados_linha))
+
+        let area_destaque = d3.select("svg.vis-timeline")
+                              .select("path.timeline-destaque");
+        
+        if (area_destaque.nodes().length == 0) {
+            area_destaque = d3.select("svg.vis-timeline").append("path")
+        };
+
+        area_destaque
+          .datum(dados_linha)
+          .classed("timeline-destaque", true)
+          .attr("d", gerador_area_destaque);
+
+
+
+        // let linha_destaque = d3.select("svg.vis-timeline")
+        //   .select("path.timeline-destaque")
+        //   .datum(dados_linha);
+
+        // let linha_destaque_enter = linha_destaque
+        //   .enter()
+        //   .append("path");
+
+        // linha_destaque = linha_destaque.merge(linha_destaque_enter)
+
+        // linha_destaque
+        //   .classed("timeline-destaque", true)
+        // //   .transition()
+        // //   .duration(duracao)
+        //   .attr("d", gerador_area_destaque);
+
+    }
 
     function desenha_destaques(valor_destacado) {
 
@@ -601,7 +654,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
                     return(formataBR_1(valor_percentual) + "%");             
                 })
                 .attr("x", d => x_scale(parametros[categoria].subtotais.filter(e => e.categoria == d.categoria)[0].subtotal) + 5);           
-        }       
+        }
+        desenha_destaque_timeline(dados_filtrados);
     }  
     
     function remove_labels_destaque() {
