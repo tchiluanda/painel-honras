@@ -86,12 +86,32 @@ text {
 }
 
 .axis text {
-    color: #555;
+    color: var(--cor-cinza-escura);
 }
 
 text.principal-labels {
     font-size: 10px;
-    color: var(--cor-escura);
+    fill: var(--cor-cinza-escura);
+}
+
+text.principal-labels.label-destacado {
+    fill: var(--cor-escura);
+    font-weight: bold;
+}
+
+rect.subtotais {
+    fill: var(--cor-clara);
+}
+
+rect.subtotais.principal {
+    fill: var(--cor-escura);
+    stroke: var(--cor-escura);
+    cursor: pointer;
+}
+
+rect.subtotais.nao-destacado {
+    fill: var(--cor-cinza-clara);
+    stroke: var(--cor-cinza-clara);
 }
 
 .axis.auxiliar1 text,
@@ -101,6 +121,7 @@ text.auxiliar2-labels {
     font-size: 8px;
 }
 
+/*
 rect.auxiliar1, rect.auxiliar2 {
     fill: #CF78AF;
-}
+}*/

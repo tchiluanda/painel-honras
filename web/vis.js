@@ -282,8 +282,6 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         const dados = parametros[categoria].subtotais;
         //console.log("dados dentro de subtotais", categoria, dados)
-        const cor_barra = cor_padrao;
-        //const classe_barra = "subtotais"
 
         const y_scale = dimensoes[classe_svg].y_scale
           .range(obtem_range_y(classe_svg, categoria))
@@ -318,8 +316,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .attr("y", d => y_scale(d.categoria))
             .attr("height", 0.75 * dimensoes[classe_svg].altura_barras)
             .attr("width", d => classe_svg != "principal" ? 0 : w_scale(d.subtotal) + 1)
-            .attr("fill", cor_padrao)
-            .attr("stroke", cor_padrao)
+            .classed("subtotais", true) // fill e stroke definido em classes
             .attr("stroke-width", classe_svg == "principal" ? 2 : 0)
             .attr("opacity", d => classe_svg != "principal" ? 1 : 0)
             .transition()
@@ -518,10 +515,36 @@ d3.csv("dados/dados.csv").then(function(dados) {
     ///////////////////////
     // destaques
 
-    function destaca_selecao(selecao) {
+    function destaca_selecao(opcao) {
 
-        // barra_destacada = d3.select("svg.vis-principal").select(selecao);
+        categoria_selecionada = d3.select(opcao).data()[0].categoria;
+        console.log(categoria_selecionada);
 
+        let posicao_selecionada;
+
+        d3.select("svg.vis-principal").selectAll("rect.principal")
+            .classed("nao-destacado", function(d,i) {
+                if (d.categoria == categoria_selecionada) posicao_selecionada = i;
+                return (d.categoria != categoria_selecionada);
+            });
+
+        console.log(posicao_selecionada);
+
+        d3.select("svg.vis-principal").selectAll("text.principal-labels")
+            .classed("label-destacado", d => d.categoria == categoria_selecionada);
+
+        d3.select("svg.vis-principal").selectAll("g.axis text")
+            .attr("fill", d => d == categoria_selecionada ? "var(--cor-escura)" : "currentColor")
+            .style("font-weight", d => d == categoria_selecionada ? "bold" : "normal");
+            
+
+        // barra_destacada
+        //     .attr("fill", "var(--cor-escura")
+        //     .attr("stroke", "var(--cor-escura");
+
+        // const valor_barra = barra_destacada.data()[0].categoria;
+
+        // d3.select("svg.vis-principal").selectAll("g.axis text").forEachattr("fill", d => d == valor_barra ? "var(--cor-escura)" : "blue")
 
         // d3.select("svg.vis-principal").selectAll("g.axis text").attr("fill", (d,i) => i == 4 ? "red" : "blue")
 
@@ -555,6 +578,15 @@ d3.csv("dados/dados.csv").then(function(dados) {
       ultimo_estado = opcao;
 
       desenha_estado_atual(opcao)
+    });
+
+    ////////////////////////
+    // listener das barras, para o destaque
+
+    d3.select("svg.vis-principal").selectAll("rect.principal").on("click", function() {
+        console.log("ui")
+        const selecao = this;
+        destaca_selecao(selecao);
     });
 
     ///////////////////////
