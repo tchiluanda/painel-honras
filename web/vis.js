@@ -490,28 +490,6 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .text("Valores mensais (R$ mi)");
     }
 
-    function desenha_estado_atual(opcao) {
-        desenha_principal(opcao);
-        desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
-        desenha_subtotais("auxiliar2", estado[opcao].auxiliar2);
-        desenha_timeline();
-    }
-
-    //////////////////////
-    // para dar início!
-
-    let ultimo_estado = "mutuario";
-
-    // fiz essa função para poder amarrar um listener de tamanho da janela;
-
-    function resize_init() {
-        dimensiona_container();
-        dimensiona_vis();
-        desenha_estado_atual(ultimo_estado);
-    }
-
-    desenha_estado_atual(ultimo_estado);
-
     ///////////////////////
     // destaques
 
@@ -537,18 +515,6 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .attr("fill", d => d == categoria_selecionada ? "var(--cor-escura)" : "currentColor")
             .style("font-weight", d => d == categoria_selecionada ? "bold" : "normal");
             
-
-        // barra_destacada
-        //     .attr("fill", "var(--cor-escura")
-        //     .attr("stroke", "var(--cor-escura");
-
-        // const valor_barra = barra_destacada.data()[0].categoria;
-
-        // d3.select("svg.vis-principal").selectAll("g.axis text").forEachattr("fill", d => d == valor_barra ? "var(--cor-escura)" : "blue")
-
-        // d3.select("svg.vis-principal").selectAll("g.axis text").attr("fill", (d,i) => i == 4 ? "red" : "blue")
-
-
     }
 
     function desenha_destaques(classe_svg, variavel_destaque, valor_destaque) {
@@ -559,6 +525,43 @@ d3.csv("dados/dados.csv").then(function(dados) {
         classe_barra = "destaque";
 
     }
+
+    ////////////////////////
+    // listener das barras, para o destaque
+
+    function listener_barras() {
+        d3.select("svg.vis-principal").selectAll("rect.principal").on("click", function() {
+            console.log("ui")
+            const selecao = this;
+            destaca_selecao(selecao);
+        });
+    }
+
+    ////////////////////////
+    // a funcao que vai chamar todo mundo
+
+    function desenha_estado_atual(opcao) {
+        desenha_principal(opcao);
+        desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
+        desenha_subtotais("auxiliar2", estado[opcao].auxiliar2);
+        desenha_timeline();
+        listener_barras();
+    }    
+
+    //////////////////////
+    // para dar início!
+
+    let ultimo_estado = "mutuario";
+
+    // fiz essa função para poder amarrar um listener de tamanho da janela;
+
+    function resize_init() {
+        dimensiona_container();
+        dimensiona_vis();
+        desenha_estado_atual(ultimo_estado);
+    }
+
+    desenha_estado_atual(ultimo_estado);
 
     ///////////////////////
     // listener dos botões
@@ -580,14 +583,6 @@ d3.csv("dados/dados.csv").then(function(dados) {
       desenha_estado_atual(opcao)
     });
 
-    ////////////////////////
-    // listener das barras, para o destaque
-
-    d3.select("svg.vis-principal").selectAll("rect.principal").on("click", function() {
-        console.log("ui")
-        const selecao = this;
-        destaca_selecao(selecao);
-    });
 
     ///////////////////////
     // listener do resize
