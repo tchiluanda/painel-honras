@@ -658,13 +658,15 @@ d3.csv("dados/dados.csv").then(function(dados) {
         desenha_destaque_timeline(dados_filtrados);
     }  
     
-    function remove_labels_destaque() {
+    function remove_labels_e_timeline_destaque() {
         for (let i of [1,2]) {
             const classe_svg = "auxiliar" + i;
             d3.select("svg.vis-" + classe_svg)
                 .selectAll("text." + classe_svg + "-labels-destaques")
                 .remove();
         }
+
+        d3.select("path.timeline-destaque").remove();
     }
 
     function destaca_selecao(opcao) {
@@ -709,7 +711,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     // a funcao que vai chamar todo mundo
 
     function desenha_estado_atual(opcao) {
-        remove_labels_destaque();
+        remove_labels_e_timeline_destaque();
         desenha_principal(opcao);
         desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
         desenha_subtotais("auxiliar2", estado[opcao].auxiliar2);
