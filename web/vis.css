@@ -123,11 +123,13 @@ rect.auxiliar2.destaques {
 .axis.auxiliar1 text,
 .axis.auxiliar2 text,
 text.auxiliar1-labels,
-text.auxiliar2-labels {
+text.auxiliar2-labels,
+text.auxiliar1-labels-destaques,
+text.auxiliar2-labels-destaques {
     font-size: 8px;
 }
 
-/*
-rect.auxiliar1, rect.auxiliar2 {
-    fill: #CF78AF;
-}*/
+text.auxiliar1-labels-destaques,
+text.auxiliar2-labels-destaques {
+    fill: var(--cor-escura);
+}

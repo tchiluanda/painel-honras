@@ -499,7 +499,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         const variavel_aux1 = estado[ultimo_estado].auxiliar1;
         const variavel_aux2 = estado[ultimo_estado].auxiliar2;
 
-        console.log(variavel_principal, variavel_aux1, variavel_aux2);
+        //console.log(variavel_principal, variavel_aux1, variavel_aux2);
 
         const dados_filtrados = dados
             .filter(d => d[variavel_principal] == valor_destacado);
@@ -508,14 +508,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         const dados_aux2 = group_by_sum(dados_filtrados, variavel_aux2, "valor", variavel_aux2 != "ano");
 
-        console.log("Dados para o destaque", dados_filtrados, dados_aux1, dados_aux2);
+        //console.log("Dados para o destaque", dados_filtrados, dados_aux1, dados_aux2);
 
         for (let i of [1,2]) {
             const classe_svg = "auxiliar" + i;
             const categoria = [variavel_aux1, variavel_aux2][i-1];
             const dados_destaque = [dados_aux1, dados_aux2][i-1];
 
-            console.log("dados destaque", categoria);
+            //console.log("dados destaque", categoria);
             
             const y_scale = dimensoes[classe_svg].y_scale
                 .range(obtem_range_y(classe_svg, categoria))
@@ -533,8 +533,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 .transition()
                 .duration(duracao)
                 .attr("width", 0)
-                .remove();
-   
+                .remove(); // talvez nem precisasse remover
+
+            // coisas que não mudam, independente de ser uma barra nova ou não
+
             let barras_destaque_enter = barras_destaque
                 .enter()
                 .append("rect")
@@ -549,18 +551,72 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
             barras_destaque = barras_destaque.merge(barras_destaque_enter);
 
+            // o que muda numa transição
+
             barras_destaque
                 .transition()
                 .duration(duracao)
                 .attr("width", d => w_scale(d.subtotal) + 1);
 
+            // oculta labels anteriores
+
+            d3.select("svg.vis-" + classe_svg).selectAll("text." + classe_svg + "-labels")
+               .transition()
+               .duration(duracao)
+               .attr("opacity", 0);
+
+            // acrescenta labels dos percentuais
+
+            let labels_destaque = d3.select("svg.vis-" + classe_svg)
+                .selectAll("text." + classe_svg + "-labels-destaques")
+                .data(dados_destaque, d => d.categoria);  
+                
+            labels_destaque
+                .exit()
+                .text("0 %")
+
+            let labes_destaque_enter = labels_destaque
+                .enter()
+                .append("text")
+                .classed(classe_svg+"-labels-destaques", true)
+                .attr("y", d => y_scale(d.categoria) + dimensoes[classe_svg].altura_barras/2)
+                .attr("opacity", 0)
+                .transition()
+                .duration(duracao)
+                .attr("opacity", 1);  
+                
+            labels_destaque = labels_destaque.merge(labes_destaque_enter);
+           
+            labels_destaque
+                .text(function(d) {
+
+                    const valor_destaque = d.subtotal;
+
+                    //console.log("dentro do cálculo do label de destaque", parametros[categoria].subtotais, parametros[categoria].subtotais.filter(e => e.categoria == d.categoria)[0].categoria, d.categoria);
+
+                    let valor_barra_total = parametros[categoria].subtotais.filter(e => e.categoria == d.categoria)[0].subtotal;
+
+                    let valor_percentual = !valor_barra_total ? 0 : 100* valor_destaque/valor_barra_total;
+
+                    return(formataBR_1(valor_percentual) + "%");             
+                })
+                .attr("x", d => x_scale(parametros[categoria].subtotais.filter(e => e.categoria == d.categoria)[0].subtotal) + 5);           
         }       
-    }    
+    }  
+    
+    function remove_labels_destaque() {
+        for (let i of [1,2]) {
+            const classe_svg = "auxiliar" + i;
+            d3.select("svg.vis-" + classe_svg)
+                .selectAll("text." + classe_svg + "-labels-destaques")
+                .remove();
+        }
+    }
 
     function destaca_selecao(opcao) {
 
         categoria_selecionada = d3.select(opcao).data()[0].categoria;
-        console.log(categoria_selecionada);
+        //console.log(categoria_selecionada);
 
         let posicao_selecionada;
 
@@ -570,7 +626,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 return (d.categoria != categoria_selecionada);
             });
 
-        console.log(posicao_selecionada);
+        //console.log(posicao_selecionada);
 
         d3.select("svg.vis-principal").selectAll("text.principal-labels")
             .classed("label-destacado", d => d.categoria == categoria_selecionada);
@@ -589,7 +645,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     function listener_barras() {
         d3.select("svg.vis-principal").selectAll("rect.principal").on("click", function() {
-            console.log("ui")
+            //console.log("ui")
             const selecao = this;
             destaca_selecao(selecao);
         });
@@ -599,6 +655,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     // a funcao que vai chamar todo mundo
 
     function desenha_estado_atual(opcao) {
+        remove_labels_destaque();
         desenha_principal(opcao);
         desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
         desenha_subtotais("auxiliar2", estado[opcao].auxiliar2);
@@ -651,4 +708,4 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     // d3.select("svg.vis-principal").selectAll("g.axis text").attr("fill", (d,i) => d == "Goiás" ? "coral" : "blue")
 
-})
+});
