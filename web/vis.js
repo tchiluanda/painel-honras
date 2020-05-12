@@ -493,6 +493,70 @@ d3.csv("dados/dados.csv").then(function(dados) {
     ///////////////////////
     // destaques
 
+    function desenha_destaques(valor_destacado) {
+
+        const variavel_principal = ultimo_estado;
+        const variavel_aux1 = estado[ultimo_estado].auxiliar1;
+        const variavel_aux2 = estado[ultimo_estado].auxiliar2;
+
+        console.log(variavel_principal, variavel_aux1, variavel_aux2);
+
+        const dados_filtrados = dados
+            .filter(d => d[variavel_principal] == valor_destacado);
+
+        const dados_aux1 = group_by_sum(dados_filtrados, variavel_aux1, "valor", variavel_aux1 != "ano");
+
+        const dados_aux2 = group_by_sum(dados_filtrados, variavel_aux2, "valor", variavel_aux2 != "ano");
+
+        console.log("Dados para o destaque", dados_filtrados, dados_aux1, dados_aux2);
+
+        for (let i of [1,2]) {
+            const classe_svg = "auxiliar" + i;
+            const categoria = [variavel_aux1, variavel_aux2][i-1];
+            const dados_destaque = [dados_aux1, dados_aux2][i-1];
+
+            console.log("dados destaque", categoria);
+            
+            const y_scale = dimensoes[classe_svg].y_scale
+                .range(obtem_range_y(classe_svg, categoria))
+                .domain(parametros[categoria].dominios);
+
+            const x_scale = dimensoes[classe_svg].x_scale;
+            const w_scale = dimensoes[classe_svg].w_scale;
+
+            let barras_destaque = d3.select("svg.vis-" + classe_svg)
+                .selectAll("rect." + classe_svg + ".destaques")
+                .data(dados_destaque, d => d.categoria);
+
+            barras_destaque
+                .exit()
+                .transition()
+                .duration(duracao)
+                .attr("width", 0)
+                .remove();
+   
+            let barras_destaque_enter = barras_destaque
+                .enter()
+                .append("rect")
+                .classed(classe_svg, true)
+                .classed("destaques", true)
+                .attr("x", d => x_scale(0))
+                .attr("y", d => y_scale(d.categoria))
+                .attr("height", 0.75 * dimensoes[classe_svg].altura_barras)
+                //.attr("width", 0)
+                .attr("stroke-width", 0)
+                .attr("opacity", 1);
+
+            barras_destaque = barras_destaque.merge(barras_destaque_enter);
+
+            barras_destaque
+                .transition()
+                .duration(duracao)
+                .attr("width", d => w_scale(d.subtotal) + 1);
+
+        }       
+    }    
+
     function destaca_selecao(opcao) {
 
         categoria_selecionada = d3.select(opcao).data()[0].categoria;
@@ -514,17 +578,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
         d3.select("svg.vis-principal").selectAll("g.axis text")
             .attr("fill", d => d == categoria_selecionada ? "var(--cor-escura)" : "currentColor")
             .style("font-weight", d => d == categoria_selecionada ? "bold" : "normal");
-            
+
+        desenha_destaques(categoria_selecionada);            
     }
 
-    function desenha_destaques(classe_svg, variavel_destaque, valor_destaque) {
 
-        data = group_by_sum(dados
-            .filter(d => d[variavel_destaque] == valor_destaque))
-        cor_barra = cor_destaque;
-        classe_barra = "destaque";
-
-    }
 
     ////////////////////////
     // listener das barras, para o destaque

@@ -114,6 +114,12 @@ rect.subtotais.nao-destacado {
     stroke: var(--cor-cinza-clara);
 }
 
+rect.auxiliar1.destaques,
+rect.auxiliar2.destaques {
+    fill: var(--cor-escura);
+    stroke: var(--cor-cinza-escura);
+}
+
 .axis.auxiliar1 text,
 .axis.auxiliar2 text,
 text.auxiliar1-labels,
