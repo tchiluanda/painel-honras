@@ -694,6 +694,18 @@ d3.csv("dados/dados.csv").then(function(dados) {
         desenha_destaques(categoria_selecionada);            
     }
 
+    function remove_para_modo_detalhado() {
+        d3.selectAll("svg.vis-auxiliar1, svg.vis-auxiliar2, svg.vis-timeline").selectAll("*").remove();
+        d3.select("svg.vis-principal").selectAll(".axis, .principal-labels, .subtotais").remove();
+    }
+
+    function redimensiona_svg_auxiliares(opcao) {
+        d3.select("div.vis-container").classed("modo-detalhado", 
+        opcao == "detalhado");
+        d3.selectAll("svg.vis-auxiliar1, svg.vis-auxiliar2, svg.vis-timeline").classed("modo-detalhado", 
+        opcao == "detalhado");
+    }
+
 
 
     ////////////////////////
@@ -735,7 +747,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     desenha_estado_atual(ultimo_estado);
 
     ///////////////////////
-    // listener dos botões
+    // listener dos botões de categorias
 
     const $botoes_categorias = d3.selectAll("nav.js--controle-categoria > button");
 
@@ -753,6 +765,32 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
       desenha_estado_atual(opcao)
     });
+
+    ///////////////////////
+    // listener dos botões de agregado /detalhado
+
+    const $botoes_principais = d3.selectAll("nav.js--controle-principal > button");
+
+    $botoes_principais.on("click", function(){
+     
+      const opcao = this.id;
+
+      $botoes_principais.classed("selected", false);
+      d3.select(this).classed("selected", true);
+
+      redimensiona_svg_auxiliares(opcao)
+
+      if (opcao == "agregado") {
+          for_the_first_time_in_forever = true; // essas duas coisas deveriam estar em funções
+          classes.forEach(d => cria_eixos_y(d))
+          desenha_estado_atual(ultimo_estado)
+      }
+      else {
+          remove_para_modo_detalhado();
+          desenha_detalhado
+      }
+    });
+
 
 
     ///////////////////////

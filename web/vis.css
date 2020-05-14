@@ -44,6 +44,14 @@ svg {
     height: 100%;
 }
 
+div.vis-container.modo-detalhado {
+    display: block;
+}
+
+svg.modo-detalhado {
+    display: none;
+}
+
 svg.vis-principal {
     grid-area: vis-principal;
 }
