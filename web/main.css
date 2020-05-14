@@ -92,6 +92,7 @@ nav.controle-vis button {
     border: none;
     border-bottom: 5px solid transparent;;
     font-family: "Merriweather Sans", sans-serif;
+    color: var(--cor-fonte);
 }
 
 nav.controle-vis button:focus {

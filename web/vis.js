@@ -706,6 +706,69 @@ d3.csv("dados/dados.csv").then(function(dados) {
         opcao == "detalhado");
     }
 
+    function volta_para_agregado() {
+        d3.select(":root")
+        .transition()
+        .duration(duracao)
+        .style("--cor-escura", null)
+        .style("--cor-fonte", null)
+        .style("--cor-fundo", null);
+    }
+
+    function vai_para_detalhado() {
+        console.log("hi", rects_honras.each(d => d.attr("x")));
+        rects_honras.each(function(d,i,nodes) {
+            dados[i]["x"] = nodes[i].getBoundingClientRect().x;
+            dados[i]["y"] = nodes[i].getBoundingClientRect().y;
+        });
+        dimensiona_container();
+        remove_para_modo_detalhado();
+        desenha_detalhado();
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // BOLHAS
+
+
+
+    function configura_simulacao() {
+        const magnitudeForca = 0.04;
+        const carga = function(d) {
+          return -Math.pow(lado/2, 2.0) * magnitudeForca;
+        }
+        
+        const atualiza_tick = function() {
+          rects_honras
+            .attr("x", d => d.x)
+            .attr("y", d => d.y);    
+        };
+        
+      const simulacao = d3.forceSimulation()
+          .velocityDecay(0.2)
+          .force('x', d3.forceX().strength(magnitudeForca).x(120))
+          .force('y', d3.forceY().strength(magnitudeForca).y(120))
+          .force('charge', d3.forceManyBody().strength(carga))
+          .on('tick', atualiza_tick);
+      
+      simulacao.stop()
+      simulacao.nodes(dados);
+    }
+    
+    function desenha_detalhado() {
+        console.log("oi")
+    
+    
+        d3.select(":root")
+          .transition()
+          .duration(duracao)
+          .style("--cor-escura", "#ffde59")
+          .style("--cor-fonte", "#ffde59")
+          .style("--cor-fundo", "#832561");
+    }
+
+    // fim bolhas 
+    //////////////////////////////////////////////////////////////////////////
+
 
 
     ////////////////////////
@@ -781,13 +844,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
       redimensiona_svg_auxiliares(opcao)
 
       if (opcao == "agregado") {
+          volta_para_agregado();
           for_the_first_time_in_forever = true; // essas duas coisas deveriam estar em funções
           classes.forEach(d => cria_eixos_y(d))
           desenha_estado_atual(ultimo_estado)
       }
       else {
-          remove_para_modo_detalhado();
-          desenha_detalhado
+          vai_para_detalhado();
+
       }
     });
 
