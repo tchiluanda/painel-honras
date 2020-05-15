@@ -66,6 +66,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
     ///////////////////////////////////////////////////
     // parâmetros gerais
 
+    let simulacao;
+
     const max_honra = d3.max(dados, d => +d.valor);
     const max_valor = d3.max(parametros._maximos);
     const max_quantidade = d3.max(parametros._quantidades);
@@ -363,7 +365,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         // // para as bolhas
         const escala_raio = d3.scaleSqrt()
-          .range([2, 40])  // 45
+          .range([2, 35])  // 45
           .domain([0, max_honra]);
 
         // atualiza eixo
@@ -380,19 +382,20 @@ d3.csv("dados/dados.csv").then(function(dados) {
         // atualiza os retangulos
         
         rects_honras
+          .transition()
+          .duration(duracao)       
+          .attr("fill", d => color(d[categoria]))
+          .transition()
+          .delay(duracao)
+          .duration(duracao*2)
           .attr("height", 0.75 * dimensoes["principal"].altura_barras)
           .attr("width", function(d,i) {
               let largura = dimensoes["principal"].w_scale(+d.valor) + 1;
               //let area = largura * 0.75 * dimensoes["principal"].altura_barras; //(1)
               dados[i]["raio"] = escala_raio(+d.valor);
               return largura;
-            })
-          .transition()
-          .duration(duracao)
-          .attr("fill", d => color(d[categoria]))
-          .transition()
-          .delay(duracao)
-          .duration(duracao*2)
+            })            
+          .attr("rx", 0) // para a volta da simulação
           .attr("x", d => dimensoes["principal"].x_scale(+d["pos_ini_"+categoria]))
           .attr("y", d => y_scale(d[categoria]))
           //.attr("height", y.bandwidth() * 0.75)
@@ -714,11 +717,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
         d3.select("svg.vis-principal").selectAll(".axis, .principal-labels, .subtotais").remove();
     }
 
-    function redimensiona_svg_auxiliares(opcao) {
+    function redimensiona_svgs(opcao) {
         d3.select("div.vis-container").classed("modo-detalhado", 
         opcao == "detalhado");
         d3.selectAll("svg.vis-auxiliar1, svg.vis-auxiliar2, svg.vis-timeline").classed("modo-detalhado", 
         opcao == "detalhado");
+        dimensiona_container();
+        dimensoes["principal"] = pega_dimensoes("principal");
     }
 
     function volta_para_agregado() {
@@ -729,26 +734,25 @@ d3.csv("dados/dados.csv").then(function(dados) {
         .style("--cor-fonte", null)
         .style("--cor-fundo", null);
 
+        simulacao.stop();
+
         rects_honras
-         .transition()
-         .duration(duracao)
-         .attr("rx", 0)
-         .attr("stroke-width", 0);
+         .attr("stroke-width", null)
+         .attr("stroke", null);
     }
 
     function armazena_posicoes_atuais() {
         rects_honras.each(function(d,i,nodes) {
-            dados[i]["x"] = nodes[i].getBoundingClientRect().x;
-            dados[i]["y"] = nodes[i].getBoundingClientRect().y;
+            dados[i]["x"] = +d3.select(this).attr("x");
+            dados[i]["y"] = +d3.select(this).attr("y");
         });
+        rects_honras.attr("fill", "dodgerblue")
         console.log("Primeiro y", dados[0].y, d3.select("svg.vis-principal").style("width"));
     }
 
-    function vai_para_detalhado() {
-        let simulacao;
+    function vai_para_detalhado(opcao) {
         armazena_posicoes_atuais()
-        dimensiona_container();
-        dimensoes["principal"] = pega_dimensoes("principal");
+        redimensiona_svgs(opcao)
         remove_para_modo_detalhado();
         desenha_detalhado();
     }
@@ -793,18 +797,18 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .style("--cor-fonte", cor_escura_sim)
           .style("--cor-fundo", cor_fundo_sim);
 
-        rects_honras
-          .transition()
-          .duration(duracao)
-          .attr("rx", d => 2*d.raio)
-          .attr("width", d => 2*d.raio)
-          .attr("height", d => 2*d.raio)
-          .attr("fill", "var(--cor-escura")
-          .attr("stroke", d3.rgb(cor_escura_sim).darker())
-          .attr("stroke-width", 1);
-
         configura_simulacao();
         simulacao.alpha(1).restart();
+
+        rects_honras
+        .transition()
+        .duration(duracao)
+        .attr("rx", d => 2*d.raio)
+        .attr("width", d => 2*d.raio)
+        .attr("height", d => 2*d.raio)
+        .attr("fill", "var(--cor-escura")
+        .attr("stroke", d3.rgb(cor_escura_sim).darker())
+        .attr("stroke-width", 1);
     }
 
     // fim bolhas 
@@ -882,17 +886,17 @@ d3.csv("dados/dados.csv").then(function(dados) {
       $botoes_principais.classed("selected", false);
       d3.select(this).classed("selected", true);
 
-      redimensiona_svg_auxiliares(opcao)
+      
 
       if (opcao == "agregado") {
+          redimensiona_svgs(opcao)
           volta_para_agregado();
           for_the_first_time_in_forever = true; // essas duas coisas deveriam estar em funções
           classes.forEach(d => cria_eixos_y(d))
           desenha_estado_atual(ultimo_estado)
       }
       else {
-          vai_para_detalhado();
-
+          vai_para_detalhado(opcao);
       }
     });
 
