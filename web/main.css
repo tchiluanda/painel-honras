@@ -7,6 +7,8 @@
     --cor-clara: #CF78AF;
     --cor-fonte: rgb(75,75,75);
     --cor-fonte-clara: white;
+    --cor-escura-sim: #ffde59;
+    --cor-fundo-sim: #832561;
     --fonte-serifa: "Merriweather";
     --fonte-sem-serifa: "Merriweather Sans";
     font-size: 0.8em;
@@ -23,8 +25,8 @@ body, p {
 }
 
 .dark {
-    --cor-fundo: #832561;
-    --cor-escura: #ffde59;
+    --cor-fundo: var(--cor-fundo-sim);
+    --cor-escura: var(--cor-escura-sim);
 }
 
 header {

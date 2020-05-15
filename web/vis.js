@@ -61,15 +61,18 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     };
 
-    console.log(parametros);
+    //console.log(parametros);
 
     ///////////////////////////////////////////////////
     // parâmetros gerais
 
+    const max_honra = d3.max(dados, d => +d.valor);
     const max_valor = d3.max(parametros._maximos);
     const max_quantidade = d3.max(parametros._quantidades);
     const duracao = 700;
     const cor_padrao = d3.select(":root").style("--cor-escura");
+    const cor_escura_sim = d3.select(":root").style("--cor-escura-sim");
+    const cor_fundo_sim = d3.select(":root").style("--cor-fundo-sim");
     const cor_destaque = "coral";
 
     ///////////////////////////////////////////////////
@@ -357,6 +360,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
         const y_scale = d3.scaleBand()
           .range(obtem_range_y("principal", categoria))
           .domain(parametros[categoria].dominios);
+        
+        // // para as bolhas
+        const escala_raio = d3.scaleSqrt()
+          .range([2, 40])  // 45
+          .domain([0, max_honra]);
 
         // atualiza eixo
 
@@ -370,10 +378,15 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .call(novo_eixo);
 
         // atualiza os retangulos
-
+        
         rects_honras
           .attr("height", 0.75 * dimensoes["principal"].altura_barras)
-          .attr("width", d => dimensoes["principal"].w_scale(+d.valor) + 1)
+          .attr("width", function(d,i) {
+              let largura = dimensoes["principal"].w_scale(+d.valor) + 1;
+              //let area = largura * 0.75 * dimensoes["principal"].altura_barras; //(1)
+              dados[i]["raio"] = escala_raio(+d.valor);
+              return largura;
+            })
           .transition()
           .duration(duracao)
           .attr("fill", d => color(d[categoria]))
@@ -386,7 +399,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .transition()
           .delay(duracao*2)
           .duration(duracao*1.5)
-          .attr("fill", cor_padrao)
+          .attr("fill", cor_padrao);
+
+          //(1) armazeno uma propriedade "lado" em dados para usar na simulacao
 
         desenha_subtotais("principal", categoria);
        
@@ -713,15 +728,27 @@ d3.csv("dados/dados.csv").then(function(dados) {
         .style("--cor-escura", null)
         .style("--cor-fonte", null)
         .style("--cor-fundo", null);
+
+        rects_honras
+         .transition()
+         .duration(duracao)
+         .attr("rx", 0)
+         .attr("stroke-width", 0);
     }
 
-    function vai_para_detalhado() {
-        console.log("hi", rects_honras.each(d => d.attr("x")));
+    function armazena_posicoes_atuais() {
         rects_honras.each(function(d,i,nodes) {
             dados[i]["x"] = nodes[i].getBoundingClientRect().x;
             dados[i]["y"] = nodes[i].getBoundingClientRect().y;
         });
+        console.log("Primeiro y", dados[0].y, d3.select("svg.vis-principal").style("width"));
+    }
+
+    function vai_para_detalhado() {
+        let simulacao;
+        armazena_posicoes_atuais()
         dimensiona_container();
+        dimensoes["principal"] = pega_dimensoes("principal");
         remove_para_modo_detalhado();
         desenha_detalhado();
     }
@@ -732,38 +759,52 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
 
     function configura_simulacao() {
+
         const magnitudeForca = 0.04;
         const carga = function(d) {
-          return -Math.pow(lado/2, 2.0) * magnitudeForca;
+            return -Math.pow(d.raio, 2.0) * magnitudeForca;
         }
+
+        let inicial;
         
         const atualiza_tick = function() {
-          rects_honras
+            rects_honras
             .attr("x", d => d.x)
-            .attr("y", d => d.y);    
+            .attr("y", d => d.y);
         };
         
-      const simulacao = d3.forceSimulation()
-          .velocityDecay(0.2)
-          .force('x', d3.forceX().strength(magnitudeForca).x(120))
-          .force('y', d3.forceY().strength(magnitudeForca).y(120))
-          .force('charge', d3.forceManyBody().strength(carga))
-          .on('tick', atualiza_tick);
-      
-      simulacao.stop()
-      simulacao.nodes(dados);
+        simulacao = d3.forceSimulation()
+            .velocityDecay(0.2)
+            .force('x', d3.forceX().strength(magnitudeForca).x(dimensoes["principal"].w_numerico/2))
+            .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/2))
+            .force('charge', d3.forceManyBody().strength(carga))
+            .on('tick', atualiza_tick);
+        
+        simulacao.stop()
+        simulacao.nodes(dados);
     }
     
-    function desenha_detalhado() {
-        console.log("oi")
-    
+    function desenha_detalhado() {    
     
         d3.select(":root")
           .transition()
           .duration(duracao)
-          .style("--cor-escura", "#ffde59")
-          .style("--cor-fonte", "#ffde59")
-          .style("--cor-fundo", "#832561");
+          .style("--cor-escura", cor_escura_sim)
+          .style("--cor-fonte", cor_escura_sim)
+          .style("--cor-fundo", cor_fundo_sim);
+
+        rects_honras
+          .transition()
+          .duration(duracao)
+          .attr("rx", d => 2*d.raio)
+          .attr("width", d => 2*d.raio)
+          .attr("height", d => 2*d.raio)
+          .attr("fill", "var(--cor-escura")
+          .attr("stroke", d3.rgb(cor_escura_sim).darker())
+          .attr("stroke-width", 1);
+
+        configura_simulacao();
+        simulacao.alpha(1).restart();
     }
 
     // fim bolhas 
