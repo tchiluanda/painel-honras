@@ -16,6 +16,9 @@ function dimensiona_container() {
 
     altura_container_vis = window.innerWidth < 1080 ? altura_container_vis * 1.5 : altura_container_vis;
 
+    altura_container_vis = altura_container_vis < 780 ? 780 : altura_container_vis;
+
+
     d3.select(".vis-container").style("height", altura_container_vis + "px");
 }
 
@@ -386,7 +389,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .duration(duracao)       
           .attr("fill", d => color(d[categoria]))
           .transition()
-          .delay(duracao)
+          .delay(ultima_selecao == "detalhado" ? 0 : duracao)
           .duration(duracao*2)
           .attr("height", 0.75 * dimensoes["principal"].altura_barras)
           .attr("width", function(d,i) {
@@ -843,6 +846,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     // para dar início!
 
     let ultimo_estado = "mutuario";
+    let ultima_selecao = "agregado";
 
     // fiz essa função para poder amarrar um listener de tamanho da janela;
 
@@ -889,13 +893,17 @@ d3.csv("dados/dados.csv").then(function(dados) {
       
 
       if (opcao == "agregado") {
+        d3.select("nav.js--controle-categoria").style("opacity", "1");
           redimensiona_svgs(opcao)
           volta_para_agregado();
           for_the_first_time_in_forever = true; // essas duas coisas deveriam estar em funções
           classes.forEach(d => cria_eixos_y(d))
           desenha_estado_atual(ultimo_estado)
+          ultima_selecao = opcao;
       }
       else {
+          d3.select("nav.js--controle-categoria").style("opacity", "0");
+          ultima_selecao = opcao;
           vai_para_detalhado(opcao);
       }
     });
