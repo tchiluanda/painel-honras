@@ -14,9 +14,22 @@ function dimensiona_container() {
     // atenção! a margen não entra nesse cálculo, então é importante zerar as margens verticais entre os elementos sendo medidos.
     //console.log(altura_container_vis);
 
-    altura_container_vis = window.innerWidth < 1080 ? altura_container_vis * 1.5 : altura_container_vis;
 
-    altura_container_vis = altura_container_vis < 780 ? 780 : altura_container_vis;
+
+    console.log(altura_janela, altura_logo, altura_nav, altura_container_vis)
+
+    altura_container_vis = window.innerWidth < 1080 ? 950 : altura_container_vis;
+    // se é menor que 1080, quer dizer que está no modo mobile do grid.
+    // considerando o mínimo normal de 530, isso dá 424 para o painel principal, 212 para os auxiliares e 106 para a timeline.
+    // então no modo mobile, considerando o empilhamento diferente do grid, precisaria de 424+212+212+106 = 954
+
+    altura_container_vis = altura_container_vis < 530 ? 530 : altura_container_vis;
+
+    console.log(altura_container_vis)
+
+
+
+    
 
 
     d3.select(".vis-container").style("height", altura_container_vis + "px");
@@ -850,10 +863,18 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     // fiz essa função para poder amarrar um listener de tamanho da janela;
 
+    let altura_janela_anterior = window.innerHeight;
+
     function resize_init() {
-        dimensiona_container();
-        dimensiona_vis();
-        desenha_estado_atual(ultimo_estado);
+        if ((window.innerWidth < 1080) & (window.innerHeight != altura_janela_anterior)) {
+        }
+        else {
+            dimensiona_container();
+            dimensiona_vis();
+            desenha_estado_atual(ultimo_estado);
+        }
+
+        altura_janela_anterior = window.innerHeight;
     }
 
     desenha_estado_atual(ultimo_estado);
