@@ -4,7 +4,7 @@ const $qde_honras  = d3.select("strong.js--qde-honras");
 ///////////////////////////////////////////////////
 // define tamanho do container do grid
 
-function dimensiona_container() {
+function dimensiona_container(opcao) {
     let altura_logo = d3.select("header.logo").node().offsetHeight;
     //let altura_header = d3.select("main>header").node().offsetHeight;
     let altura_nav = d3.select("div.grupo-controles").node().offsetHeight;
@@ -14,28 +14,24 @@ function dimensiona_container() {
     // atenção! a margen não entra nesse cálculo, então é importante zerar as margens verticais entre os elementos sendo medidos.
     //console.log(altura_container_vis);
 
+    //console.log(altura_janela, altura_logo, altura_nav, altura_container_vis)
 
-
-    console.log(altura_janela, altura_logo, altura_nav, altura_container_vis)
-
-    altura_container_vis = window.innerWidth < 1080 ? 950 : altura_container_vis;
-    // se é menor que 1080, quer dizer que está no modo mobile do grid.
-    // considerando o mínimo normal de 530, isso dá 424 para o painel principal, 212 para os auxiliares e 106 para a timeline.
-    // então no modo mobile, considerando o empilhamento diferente do grid, precisaria de 424+212+212+106 = 954
-
-    altura_container_vis = altura_container_vis < 530 ? 530 : altura_container_vis;
-
-    console.log(altura_container_vis)
-
-
-
+    if (opcao == "agregado") {
+        altura_container_vis = window.innerWidth < 1080 ? 950 : altura_container_vis;
+        // se é menor que 1080, quer dizer que está no modo mobile do grid.
+        // considerando o mínimo normal de 530, isso dá 424 para o painel principal, 212 para os auxiliares e 106 para a timeline.
+        // então no modo mobile, considerando o empilhamento diferente do grid, precisaria de 424+212+212+106 = 954
     
+        altura_container_vis = altura_container_vis < 530 ? 530 : altura_container_vis;
+    
+    } // ou seja,se estiver no modo detalhado, usar altura do viewport
 
+    console.log(opcao, altura_container_vis);
 
     d3.select(".vis-container").style("height", altura_container_vis + "px");
 }
 
-dimensiona_container();
+dimensiona_container("agregado");
 
 // agora temos as dimensoes necessarias para cada svg nesse objeto `dimensoes`
 
@@ -381,7 +377,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         // // para as bolhas
         const escala_raio = d3.scaleSqrt()
-          .range([2, 35])  // 45
+          .range([2, dimensoes["principal"].w_numerico/30])  // 45
           .domain([0, max_honra]);
 
         // atualiza eixo
@@ -738,7 +734,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         opcao == "detalhado");
         d3.selectAll("svg.vis-auxiliar1, svg.vis-auxiliar2, svg.vis-timeline").classed("modo-detalhado", 
         opcao == "detalhado");
-        dimensiona_container();
+        dimensiona_container(opcao);
         dimensoes["principal"] = pega_dimensoes("principal");
     }
 
@@ -796,7 +792,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         simulacao = d3.forceSimulation()
             .velocityDecay(0.2)
             .force('x', d3.forceX().strength(magnitudeForca).x(dimensoes["principal"].w_numerico/2))
-            .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/2))
+            .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3))
             .force('charge', d3.forceManyBody().strength(carga))
             .on('tick', atualiza_tick);
         
@@ -866,13 +862,15 @@ d3.csv("dados/dados.csv").then(function(dados) {
     let altura_janela_anterior = window.innerHeight;
 
     function resize_init() {
-        if ((window.innerWidth < 1080) & (window.innerHeight != altura_janela_anterior)) {
-        }
-        else {
-            dimensiona_container();
-            dimensiona_vis();
-            desenha_estado_atual(ultimo_estado);
-        }
+        if (ultima_selecao == "agregado") { 
+            if ((window.innerWidth < 1080) & (window.innerHeight != altura_janela_anterior)) {
+            }
+            else {
+                dimensiona_container(ultima_selecao);
+                dimensiona_vis();
+                desenha_estado_atual(ultimo_estado);
+            }
+        } // ignora se estiver no modo detalhado
 
         altura_janela_anterior = window.innerHeight;
     }
