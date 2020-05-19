@@ -39,6 +39,12 @@ dimensiona_container("agregado");
 d3.csv("dados/dados.csv").then(function(dados) {
     console.log(dados.columns);
     // ["", "data", "tipo_divida", "Credor", "contrato", "tipo_credor", "mutuario", "tipo_mutuario", "Status", "valor", "mes", "ano", "mes_ano", "data_mes", "pos_ini_mutuario", "pos_ini_Credor", "pos_ini_tipo_divida", "pos_ini_ano"]
+    //console.log(dados[0]);
+
+    dados.forEach((d,i) => dados[i].data = d3.timeParse("%Y-%m-%d")(d.data));
+
+    console.log(dados[0]);
+  
 
     ///////////////////////////////////////////////////
     // monta um objeto com parâmetros dos dados brutos
@@ -778,10 +784,43 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     ////////////////////////////////////////////////////////////////////////
     // BOLHAS
+   
+    function desenha_detalhado() {  
+          
+        d3.select(":root")
+            .transition()
+            .duration(duracao)
+            .style("--cor-escura", cor_escura_sim)
+            .style("--cor-fonte", cor_escura_sim)
+            .style("--cor-fundo", cor_fundo_sim);
 
+        configura_simulacao("mutuario");
+        simulacao.alpha(1).restart();
 
+        rects_honras
+            .transition()
+            .duration(duracao)
+            .attr("rx", d => 2*d.raio)
+            .attr("width", d => 2*d.raio)
+            .attr("height", d => 2*d.raio)
+            .attr("fill", "var(--cor-escura")
+            .attr("stroke", d3.rgb(cor_escura_sim).darker())
+            .attr("stroke-width", 1);
 
-    function configura_simulacao() {
+        //listener das opções no modo detalhado
+
+        const $botoes_detalhado = d3.selectAll("nav.js--controle-categoria-detalhado > button");
+
+        $botoes_detalhado.on("click", function(){
+        
+            const opcao = this.id;
+            $botoes_detalhado.classed("selected", false);
+            d3.select(this).classed("selected", true);
+            move_bolhas_detalhado(opcao, "mutuario")
+        });  
+    };
+
+    function configura_simulacao(categoria) {
 
         const magnitudeForca = 0.04;
         const carga = function(d) {
@@ -798,9 +837,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .range([40, dimensoes["principal"].w_numerico - 40])
             .domain(d3.extent(dados, d => d.data));
 
+        console.log("Configura force", dimensoes["principal"].h_numerico, dimensoes["principal"].w_numerico, pos_x.range(), pos_x.domain(),pos_x(new Date("2016-04-16")));
+
+        
+
         simulacao_parametros["magnitude"] = magnitudeForca;
         simulacao_parametros["pos_x"] = pos_x;
         simulacao_parametros["pos_y"] = pos_y;
+        simulacao_parametros["carga"] = carga;
 
         // melhoria: será que valeria a pena por o listener dos botões aqui dentro, e aí as funções de desenho "total" e "timeline" seriam chamadas daqui de dentro, e poderiam aproveitar as variáveis declaradas neste escopo?
 
@@ -821,57 +865,46 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         simulacao.stop()
         simulacao.nodes(dados);
-    }
-    
-    function desenha_detalhado() {    
-    
-        d3.select(":root")
-            .transition()
-            .duration(duracao)
-            .style("--cor-escura", cor_escura_sim)
-            .style("--cor-fonte", cor_escura_sim)
-            .style("--cor-fundo", cor_fundo_sim);
+    };    
 
-        configura_simulacao();
-        simulacao.alpha(1).restart();
+    function move_bolhas_detalhado(opcao, categoria) {
 
-        rects_honras
-            .transition()
-            .duration(duracao)
-            .attr("rx", d => 2*d.raio)
-            .attr("width", d => 2*d.raio)
-            .attr("height", d => 2*d.raio)
-            .attr("fill", "var(--cor-escura")
-            .attr("stroke", d3.rgb(cor_escura_sim).darker())
-            .attr("stroke-width", 1);
-    }
-
-    function desenha_detalhado_timeline() {
-
-        let categoria = "mutuario";
         let magnitudeForca = simulacao_parametros["magnitude"];
+        let carga = simulacao_parametros["carga"];
         let pos_x = simulacao_parametros["pos_x"];
         let pos_y = simulacao_parametros["pos_y"];
 
-        simulacao
-            .force('x', d3.forceX().strength(magnitudeForca*1.4).x(d => pos_x(d.data)))
-            .force('y', d3.forceY().strength(magnitudeForca*1.4).y(d => pos_y(d[categoria])));
-        
+        if (opcao == "det-timeline") {
+            simulacao
+                .force('x', d3.forceX().strength(magnitudeForca*1.4).x(d => pos_x(d.data)))
+                .force('charge', null)
+                .force('y', d3.forceY().strength(magnitudeForca*1.4).y(d => pos_y(d[categoria]) - d.raio));
+
+            //d3.selectAll("rects.honras").transition().duration(duracao).attr("x", d => pos_x(d.data));
+        }
+
+        else if (opcao == "det-total") {
+            simulacao
+                .force('x', d3.forceX().strength(magnitudeForca).x(dimensoes["principal"].w_numerico/2))
+                .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3))
+                .force('charge', d3.forceManyBody().strength(carga));
+
+
+        };
+
         // se não dá esse restart, as bolhas não se movem
         // com "vontade"
+
         simulacao.alpha(1).restart();
+    };
 
-    }
 
-    function desenha_detalhado_total() {
+
+
         
-        let magnitudeForca = simulacao_parametros["magnitude"];
 
-        simulacao
-            .force('x', d3.forceX().strength(magnitudeForca).x(dimensoes["principal"].w_numerico/2))
-            .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3));
 
-    }
+
 
     // fim bolhas 
     //////////////////////////////////////////////////////////////////////////
@@ -946,6 +979,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
       desenha_estado_atual(opcao)
     });
+ 
 
     ///////////////////////
     // listener dos botões de agregado /detalhado
