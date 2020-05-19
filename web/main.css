@@ -81,12 +81,16 @@ nav.controle-vis {
     justify-content: center;
 }
 
+nav.controle-vis.escondido {
+    display: none;
+}
+
 nav.controle-vis:first-child {
     margin-bottom: 1rem;
     padding-top: 1rem;
 }
 
-nav.controle-vis:last-child > button {
+nav.controle-vis.controle-secundario  > button {
     font-size: 0.8em;
 }
 

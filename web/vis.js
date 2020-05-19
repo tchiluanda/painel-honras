@@ -79,6 +79,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     // parâmetros gerais
 
     let simulacao;
+    let simulacao_parametros = {};
 
     const max_honra = d3.max(dados, d => +d.valor);
     const max_valor = d3.max(parametros._maximos);
@@ -769,6 +770,12 @@ d3.csv("dados/dados.csv").then(function(dados) {
         desenha_detalhado();
     }
 
+    function alterna_barra_nav(opcao) {
+        let agregado = opcao == "agregado";
+        d3.select("nav.js--controle-categoria-detalhado").classed("escondido", agregado);
+        d3.select("nav.js--controle-categoria").classed("escondido", !agregado);
+    }
+
     ////////////////////////////////////////////////////////////////////////
     // BOLHAS
 
@@ -780,6 +787,22 @@ d3.csv("dados/dados.csv").then(function(dados) {
         const carga = function(d) {
             return -Math.pow(d.raio, 2.0) * magnitudeForca;
         }
+
+        // para a visão de timeline:
+
+        let pos_y = d3.scaleBand()
+            .range([40, dimensoes["principal"].h_numerico - 40])
+            .domain(parametros[categoria].dominios);
+
+        let pos_x = d3.scaleTime()
+            .range([40, dimensoes["principal"].w_numerico - 40])
+            .domain(d3.extent(dados, d => d.data));
+
+        simulacao_parametros["magnitude"] = magnitudeForca;
+        simulacao_parametros["pos_x"] = pos_x;
+        simulacao_parametros["pos_y"] = pos_y;
+
+        // melhoria: será que valeria a pena por o listener dos botões aqui dentro, e aí as funções de desenho "total" e "timeline" seriam chamadas daqui de dentro, e poderiam aproveitar as variáveis declaradas neste escopo?
 
         let inicial;
         
@@ -803,24 +826,51 @@ d3.csv("dados/dados.csv").then(function(dados) {
     function desenha_detalhado() {    
     
         d3.select(":root")
-          .transition()
-          .duration(duracao)
-          .style("--cor-escura", cor_escura_sim)
-          .style("--cor-fonte", cor_escura_sim)
-          .style("--cor-fundo", cor_fundo_sim);
+            .transition()
+            .duration(duracao)
+            .style("--cor-escura", cor_escura_sim)
+            .style("--cor-fonte", cor_escura_sim)
+            .style("--cor-fundo", cor_fundo_sim);
 
         configura_simulacao();
         simulacao.alpha(1).restart();
 
         rects_honras
-        .transition()
-        .duration(duracao)
-        .attr("rx", d => 2*d.raio)
-        .attr("width", d => 2*d.raio)
-        .attr("height", d => 2*d.raio)
-        .attr("fill", "var(--cor-escura")
-        .attr("stroke", d3.rgb(cor_escura_sim).darker())
-        .attr("stroke-width", 1);
+            .transition()
+            .duration(duracao)
+            .attr("rx", d => 2*d.raio)
+            .attr("width", d => 2*d.raio)
+            .attr("height", d => 2*d.raio)
+            .attr("fill", "var(--cor-escura")
+            .attr("stroke", d3.rgb(cor_escura_sim).darker())
+            .attr("stroke-width", 1);
+    }
+
+    function desenha_detalhado_timeline() {
+
+        let categoria = "mutuario";
+        let magnitudeForca = simulacao_parametros["magnitude"];
+        let pos_x = simulacao_parametros["pos_x"];
+        let pos_y = simulacao_parametros["pos_y"];
+
+        simulacao
+            .force('x', d3.forceX().strength(magnitudeForca*1.4).x(d => pos_x(d.data)))
+            .force('y', d3.forceY().strength(magnitudeForca*1.4).y(d => pos_y(d[categoria])));
+        
+        // se não dá esse restart, as bolhas não se movem
+        // com "vontade"
+        simulacao.alpha(1).restart();
+
+    }
+
+    function desenha_detalhado_total() {
+        
+        let magnitudeForca = simulacao_parametros["magnitude"];
+
+        simulacao
+            .force('x', d3.forceX().strength(magnitudeForca).x(dimensoes["principal"].w_numerico/2))
+            .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3));
+
     }
 
     // fim bolhas 
@@ -909,21 +959,21 @@ d3.csv("dados/dados.csv").then(function(dados) {
       $botoes_principais.classed("selected", false);
       d3.select(this).classed("selected", true);
 
-      
+      alterna_barra_nav(opcao);    
 
       if (opcao == "agregado") {
-        d3.select("nav.js--controle-categoria").style("opacity", "1");
-          redimensiona_svgs(opcao)
-          volta_para_agregado();
-          for_the_first_time_in_forever = true; // essas duas coisas deveriam estar em funções
-          classes.forEach(d => cria_eixos_y(d))
-          desenha_estado_atual(ultimo_estado)
-          ultima_selecao = opcao;
+        //d3.select("nav.js--controle-categoria-detalhado").classed("escondido", false);
+        redimensiona_svgs(opcao)
+        volta_para_agregado();
+        for_the_first_time_in_forever = true; // essas duas coisas deveriam estar em funções
+        classes.forEach(d => cria_eixos_y(d))
+        desenha_estado_atual(ultimo_estado)
+        ultima_selecao = opcao;
       }
       else {
-          d3.select("nav.js--controle-categoria").style("opacity", "0");
-          ultima_selecao = opcao;
-          vai_para_detalhado(opcao);
+        //d3.select("nav.js--controle-categoria").style("opacity", "0");
+        ultima_selecao = opcao;
+        vai_para_detalhado(opcao);
       }
     });
 
