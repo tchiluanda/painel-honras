@@ -45,6 +45,9 @@ header.logo {
     header img.logo-tt {
         display: none;
     }
+    header.logo {
+        padding: 1.5em 0;
+    }
 }
 
 
