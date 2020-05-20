@@ -41,9 +41,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
     // ["", "data", "tipo_divida", "Credor", "contrato", "tipo_credor", "mutuario", "tipo_mutuario", "Status", "valor", "mes", "ano", "mes_ano", "data_mes", "pos_ini_mutuario", "pos_ini_Credor", "pos_ini_tipo_divida", "pos_ini_ano"]
     //console.log(dados[0]);
 
-    localStorage.setItem('dados', JSON.stringify(dados.map(d => ({"data": d.data, "mutuario": d.mutuario, "valor": +d.valor}))));
+    //localStorage.setItem('dados', JSON.stringify(dados.map(d => ({"data": d.data, "mutuario": d.mutuario, "valor": +d.valor}))));
 
-    console.log();
+    let top_mutuarios = d3.map(dados, d => d.top_mutuario).keys();
+    console.log(top_mutuarios);
+
 
     dados.forEach((d,i) => dados[i].data = d3.timeParse("%Y-%m-%d")(d.data));
 
@@ -754,10 +756,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
         .transition()
         .duration(duracao)
         .style("--cor-escura", null)
+        .style("--cor-cinza-escura", null)
         .style("--cor-fonte", null)
         .style("--cor-fundo", null);
 
         simulacao.stop();
+
+        d3.select("svg.vis-principal").select("g.y-axis-detalhado").remove();
 
         rects_honras
          .attr("stroke-width", null)
@@ -796,6 +801,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .duration(duracao)
             .style("--cor-escura", cor_escura_sim)
             .style("--cor-fonte", cor_escura_sim)
+            .style("--cor-cinza-escura", cor_escura_sim)
             .style("--cor-fundo", cor_fundo_sim);
 
         configura_simulacao("mutuario");
@@ -835,10 +841,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         let pos_y = d3.scaleBand()
             .range([40, dimensoes["principal"].h_numerico - 40])
-            .domain(parametros[categoria].dominios);
+            .domain(top_mutuarios);
 
         let pos_x = d3.scaleTime()
-            .range([40, dimensoes["principal"].w_numerico - 40])
+            .range([120, dimensoes["principal"].w_numerico - 40])
             .domain(d3.extent(dados, d => d.data));
 
         console.log("Configura force", dimensoes["principal"].h_numerico, dimensoes["principal"].w_numerico, pos_x.range(), pos_x.domain(),pos_x(new Date("2016-04-16")));
@@ -882,7 +888,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
             simulacao
                 .force('x', d3.forceX().strength(magnitudeForca*1.4).x(d => pos_x(d.data)))
                 .force('charge', null)
-                .force('y', d3.forceY().strength(magnitudeForca*1.4).y(d => pos_y(d[categoria]) - d.raio));
+                .force('y', d3.forceY().strength(magnitudeForca*1.4).y(d => pos_y(d.top_mutuario) - d.raio));
+
+            let eixo_detalhado = d3.axisLeft().scale(pos_y);
+            d3.select("svg.vis-principal")
+              .append("g")
+              .classed("axis", true)
+              .classed("y-axis", true)
+              .classed("y-axis-detalhado", true)
+              .attr("transform", "translate(" + 120 + ",-23)")
+              .call(eixo_detalhado);
 
             //d3.selectAll("rects.honras").transition().duration(duracao).attr("x", d => pos_x(d.data));
         }
@@ -892,6 +907,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 .force('x', d3.forceX().strength(magnitudeForca).x(dimensoes["principal"].w_numerico/2))
                 .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3))
                 .force('charge', d3.forceManyBody().strength(carga));
+            
+            d3.select("svg.vis-principal").select("g.y-axis-detalhado").remove();
 
 
         };
