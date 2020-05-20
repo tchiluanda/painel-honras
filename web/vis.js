@@ -41,6 +41,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
     // ["", "data", "tipo_divida", "Credor", "contrato", "tipo_credor", "mutuario", "tipo_mutuario", "Status", "valor", "mes", "ano", "mes_ano", "data_mes", "pos_ini_mutuario", "pos_ini_Credor", "pos_ini_tipo_divida", "pos_ini_ano"]
     //console.log(dados[0]);
 
+    localStorage.setItem('dados', JSON.stringify(dados.map(d => ({"data": d.data, "mutuario": d.mutuario, "valor": +d.valor}))));
+
+    console.log();
+
     dados.forEach((d,i) => dados[i].data = d3.timeParse("%Y-%m-%d")(d.data));
 
     console.log(dados[0]);
