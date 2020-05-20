@@ -78,6 +78,16 @@ honras_pre <- honras %>%
          Credor = Credor_sigla)
 
 
+# top mutuários -----------------------------------------------------------
+
+top_mutuarios <- honras_pre %>% 
+  group_by(mutuario) %>% 
+  summarise(valor = sum(valor)) %>% 
+  arrange(desc(valor)) %>%
+  ungroup() %>%
+  mutate(top_mutuario = ifelse(rank(-valor)<=11, mutuario, "Demais")) %>%
+  select(-valor)
+
 # empilhamento dos valores ------------------------------------------------
 
 # honras_stack <- honras_pre %>%
@@ -86,7 +96,8 @@ honras_pre <- honras %>%
 
 variaveis_de_interesse <- c("mutuario", "Credor", "tipo_divida", "ano")
 
-honras_stack <- honras_pre
+honras_stack <- honras_pre %>%
+  left_join(top_mutuarios)
 
 for (var in variaveis_de_interesse) {
   quo_var <- sym(var) # transforma "var", que é string, num símbolo
