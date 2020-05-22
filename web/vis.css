@@ -77,7 +77,7 @@ svg.vis-auxiliar1, svg.vis-auxiliar2 {
 
 .axis line,
 .axis path {
-    stroke: #555;
+    stroke: var(--cor-cinza-clara);
 }
 
 .y-axis path {

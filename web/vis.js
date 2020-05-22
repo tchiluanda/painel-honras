@@ -499,7 +499,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         let eixo_x = d3.axisBottom()
             .scale(x_scale);
 
-        if (dimensoes["timeline"].w_numerico < 6000)
+        if (dimensoes["timeline"].w_numerico < 600)
             eixo_x = eixo_x.tickFormat(d => formataData_Anos(d))
                            .ticks(d3.timeYear.every(1));
         else
@@ -762,7 +762,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         simulacao.stop();
 
-        d3.select("svg.vis-principal").select("g.y-axis-detalhado").remove();
+        d3.select("svg.vis-principal").select("g.axis-detalhado").remove();
 
         rects_honras
          .attr("stroke-width", null)
@@ -802,6 +802,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .style("--cor-escura", cor_escura_sim)
             .style("--cor-fonte", cor_escura_sim)
             .style("--cor-cinza-escura", cor_escura_sim)
+            .style("--cor-cinza-clara", cor_clara_sim)
             .style("--cor-fundo", cor_fundo_sim);
 
         configura_simulacao("mutuario");
@@ -840,16 +841,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
         // para a visão de timeline:
 
         let pos_y = d3.scaleBand()
-            .range([40, dimensoes["principal"].h_numerico - 40])
+            .range([80, dimensoes["principal"].h_numerico - 40])
             .domain(top_mutuarios);
 
         let pos_x = d3.scaleTime()
-            .range([120, dimensoes["principal"].w_numerico - 40])
-            .domain(d3.extent(dados, d => d.data));
+            .range([110, dimensoes["principal"].w_numerico - 20])
+            .domain([new Date("2016-01-01"), d3.max(dados, d => d.data)]);
 
         console.log("Configura force", dimensoes["principal"].h_numerico, dimensoes["principal"].w_numerico, pos_x.range(), pos_x.domain(),pos_x(new Date("2016-04-16")));
-
-        
 
         simulacao_parametros["magnitude"] = magnitudeForca;
         simulacao_parametros["pos_x"] = pos_x;
@@ -862,7 +861,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         const atualiza_tick = function() {
             rects_honras
-            .attr("x", d => d.x - d.raio)
+            .attr("x", d => d.x - d.raio) // -d.raio pq são retângulos
             .attr("y", d => d.y - d.raio);
         };
         
@@ -898,11 +897,33 @@ d3.csv("dados/dados.csv").then(function(dados) {
               .append("g")
               .classed("axis", true)
               .classed("y-axis", true)
-              .classed("y-axis-detalhado", true)
+              .classed("axis-detalhado", true)
               .attr("transform", "translate(" + 120 + ",-23)")
               .call(eixo_detalhado);
 
-            //d3.selectAll("rects.honras").transition().duration(duracao).attr("x", d => pos_x(d.data));
+            let eixo_detalhado_top = d3.axisTop().scale(pos_x);
+
+            if (dimensoes["principal"].w_numerico < 600) {
+                eixo_detalhado_top = eixo_detalhado_top
+                    .tickFormat(d => formataData_Anos(d))
+                    .ticks(d3.timeYear.every(1));
+            }
+
+            else {
+                eixo_detalhado_top = eixo_detalhado_top
+                    .tickFormat(d => formataData(d))
+                    .ticks(d3.timeMonth.every(4));
+            }
+
+
+            d3.select("svg.vis-principal")
+                .append("g")
+                .classed("axis", true)
+                .classed("x-axis", true)
+                .classed("axis-detalhado", true)
+                .attr("transform", "translate(0,40)")
+                .call(eixo_detalhado_top);                         
+
         }
 
         else if (opcao == "det-total") {
@@ -912,8 +933,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 .force('colisao', null)
                 .force('charge', d3.forceManyBody().strength(carga));
             
-            d3.select("svg.vis-principal").select("g.y-axis-detalhado").remove();
-
+            d3.select("svg.vis-principal").selectAll("g.axis-detalhado").remove();
 
         };
 
