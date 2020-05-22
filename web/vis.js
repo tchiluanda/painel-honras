@@ -390,7 +390,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         // // para as bolhas
         const escala_raio = d3.scaleSqrt()
-          .range([2, dimensoes["principal"].w_numerico/30])  // 45
+          .range([2, 10])  // 45
           .domain([0, max_honra]);
 
         // atualiza eixo
@@ -862,8 +862,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         const atualiza_tick = function() {
             rects_honras
-            .attr("x", d => d.x)
-            .attr("y", d => d.y);
+            .attr("x", d => d.x - d.raio)
+            .attr("y", d => d.y - d.raio);
         };
         
         simulacao = d3.forceSimulation()
@@ -871,6 +871,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .force('x', d3.forceX().strength(magnitudeForca).x(dimensoes["principal"].w_numerico/2))
             .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3))
             .force('charge', d3.forceManyBody().strength(carga))
+            .force('colisao', d3.forceCollide().radius(d => d.raio))
             .on('tick', atualiza_tick);
         
         simulacao.stop()
@@ -888,7 +889,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
             simulacao
                 .force('x', d3.forceX().strength(magnitudeForca*1.4).x(d => pos_x(d.data)))
                 .force('charge', null)
-                .force('y', d3.forceY().strength(magnitudeForca*1.4).y(d => pos_y(d.top_mutuario) - d.raio));
+                .force('colisao', d3.forceCollide().radius(d => d.raio))
+                .force('y', d3.forceY().strength(magnitudeForca*1.4).y(d => pos_y(d.top_mutuario) - d.raio))
+                
 
             let eixo_detalhado = d3.axisLeft().scale(pos_y);
             d3.select("svg.vis-principal")
@@ -906,6 +909,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             simulacao
                 .force('x', d3.forceX().strength(magnitudeForca).x(dimensoes["principal"].w_numerico/2))
                 .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3))
+                .force('colisao', null)
                 .force('charge', d3.forceManyBody().strength(carga));
             
             d3.select("svg.vis-principal").select("g.y-axis-detalhado").remove();
