@@ -43,7 +43,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     //localStorage.setItem('dados', JSON.stringify(dados.map(d => ({"data": d.data, "mutuario": d.mutuario, "valor": +d.valor}))));
 
-    let top_mutuarios = d3.map(dados, d => d.top_mutuario).keys();
+    let top_mutuarios = group_by_sum(dados, "top_mutuario", "valor", true).map(d => d.categoria);
     console.log(top_mutuarios);
 
 
@@ -100,6 +100,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     const cor_padrao = d3.select(":root").style("--cor-escura");
     const cor_escura_sim = d3.select(":root").style("--cor-escura-sim");
     const cor_fundo_sim = d3.select(":root").style("--cor-fundo-sim");
+    const cor_clara_sim = d3.select(":root").style("--cor-clara-sim");
     const cor_destaque = "coral";
 
     ///////////////////////////////////////////////////
@@ -757,12 +758,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
         .duration(duracao)
         .style("--cor-escura", null)
         .style("--cor-cinza-escura", null)
+        .style("--cor-cinza-clara", null)
         .style("--cor-fonte", null)
         .style("--cor-fundo", null);
 
         simulacao.stop();
 
-        d3.select("svg.vis-principal").select("g.axis-detalhado").remove();
+        d3.select("svg.vis-principal").selectAll("g.axis-detalhado").remove();
 
         rects_honras
          .attr("stroke-width", null)
@@ -822,12 +824,17 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         const $botoes_detalhado = d3.selectAll("nav.js--controle-categoria-detalhado > button");
 
+        // deixa a opção total selecionada por padrão
+        $botoes_detalhado.classed("selected", false);
+        d3.select("#det-total").classed("selected", true);
+
+        // listener dos botões do detalhado
         $botoes_detalhado.on("click", function(){
         
             const opcao = this.id;
             $botoes_detalhado.classed("selected", false);
             d3.select(this).classed("selected", true);
-            move_bolhas_detalhado(opcao, "mutuario")
+            move_bolhas_detalhado(opcao, "mutuario");
         });  
     };
 
