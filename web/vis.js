@@ -1048,13 +1048,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
       alterna_barra_nav(opcao);    
 
       if (opcao == "agregado") {
-        //d3.select("nav.js--controle-categoria-detalhado").classed("escondido", false);
-        redimensiona_svgs(opcao)
-        volta_para_agregado();
-        for_the_first_time_in_forever = true; // essas duas coisas deveriam estar em funções
-        classes.forEach(d => cria_eixos_y(d))
-        desenha_estado_atual(ultimo_estado)
-        ultima_selecao = opcao;
+          if (ultima_selecao == "agregado") {
+              // não faz nada
+          } else {
+            redimensiona_svgs(opcao)
+            volta_para_agregado();
+            for_the_first_time_in_forever = true; // essas duas coisas deveriam estar em funções
+            classes.forEach(d => cria_eixos_y(d))
+            desenha_estado_atual(ultimo_estado)
+            ultima_selecao = opcao;
+          };
       }
       else {
         //d3.select("nav.js--controle-categoria").style("opacity", "0");
