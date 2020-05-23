@@ -1045,25 +1045,25 @@ d3.csv("dados/dados.csv").then(function(dados) {
       $botoes_principais.classed("selected", false);
       d3.select(this).classed("selected", true);
 
-      alterna_barra_nav(opcao);    
-
-      if (opcao == "agregado") {
-          if (ultima_selecao == "agregado") {
-              // não faz nada
-          } else {
+      alterna_barra_nav(opcao);
+      
+      if (opcao != ultima_selecao) {
+        if (opcao == "agregado") {
             redimensiona_svgs(opcao)
             volta_para_agregado();
             for_the_first_time_in_forever = true; // essas duas coisas deveriam estar em funções
             classes.forEach(d => cria_eixos_y(d))
             desenha_estado_atual(ultimo_estado)
             ultima_selecao = opcao;
-          };
-      }
-      else {
-        //d3.select("nav.js--controle-categoria").style("opacity", "0");
-        ultima_selecao = opcao;
-        vai_para_detalhado(opcao);
-      }
+        }
+        else {
+            //d3.select("nav.js--controle-categoria").style("opacity", "0");
+            ultima_selecao = opcao;
+            vai_para_detalhado(opcao);
+        };
+      };
+
+
     });
 
 
