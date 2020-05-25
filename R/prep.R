@@ -26,6 +26,12 @@ names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato",
                    "Honra Juros/Encargos (R$)", "Honra - Mora (R$)", "Honra - Total (R$)", 
                    "Ano Regularização", "Mês Regularização", "X24")
 
+info_cadastrais_raw <- read.csv2("./R/info_cadastrais_2020_04.csv",
+                             skip = 10, stringsAsFactors = FALSE)
+
+info_cadastrais <- info_cadastrais_raw %>%
+  select(contrato = "Nome.do.Contrato",
+         nome_projeto = Projeto)
 
 # processamento inicial ---------------------------------------------------
 
@@ -75,7 +81,8 @@ honras_pre <- honras %>%
   arrange(data) %>%
   left_join(credor_siglas) %>%
   rename(Credor_completo = Credor,
-         Credor = Credor_sigla)
+         Credor = Credor_sigla) %>%
+  left_join(info_cadastrais)
 
 
 # top mutuários -----------------------------------------------------------
