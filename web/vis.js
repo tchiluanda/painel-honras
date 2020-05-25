@@ -835,7 +835,12 @@ d3.csv("dados/dados.csv").then(function(dados) {
             $botoes_detalhado.classed("selected", false);
             d3.select(this).classed("selected", true);
             move_bolhas_detalhado(opcao, "mutuario");
-        });  
+        });
+
+        // listener dos tooltips
+        rects_honras
+          .on('mouseover', mostraTooltip)
+          .on('mouseout',  escondeTooltip);
     };
 
     function configura_simulacao(categoria) {
@@ -950,10 +955,63 @@ d3.csv("dados/dados.csv").then(function(dados) {
         simulacao.alpha(1).restart();
     };
 
-
-
-
+    function mostraTooltip(retangulo) {
+        let x_tooltip = +d3.select(this).attr('x');
+        let y_tooltip = +d3.select(this).attr('y');
+    
+        const $tooltip = d3.select("#tooltip");
         
+        let largura_tooltip_css = +$tooltip.style("width").substring(0, $tooltip.style("width").length-2);
+        
+        $tooltip.classed("hidden", false);
+
+        $tooltip.text(retangulo.mutuario)
+    
+        // popula informacao
+
+        /*
+    
+        const infos_tooltip = ["mutuario", "Credor", "tipo_divida", "ano", "projeto", "valor"];
+    
+        infos_tooltip.forEach(function(info) {
+            let text = "";
+            if (info == "valor") text = formata_vlr_tooltip(d[info])
+            else text = d[info];
+            $tooltip.select("#tooltip-"+info).text(text);
+        }) */
+    
+        // now that the content is populated, we can capture the tooltip
+        // height, so that we can optime the tt position.
+    
+        const altura_tooltip = $tooltip.node().getBoundingClientRect().height;
+        //console.log(tooltip_height);
+    
+        // calculate positions
+    
+        const pad = 10;
+
+        //console.log(x_tooltip, largura_tooltip_css, pad, dimensoes["principal"].w_numerico);
+    
+        if (x_tooltip + largura_tooltip_css + pad > dimensoes["principal"].w_numerico) {
+            x_tooltip = x_tooltip - largura_tooltip_css - pad;
+        } else {
+            x_tooltip = x_tooltip + pad
+        }
+    
+        if (y_tooltip + altura_tooltip + pad > dimensoes["principal"].h_numerico) {
+            y_tooltip = y_tooltip - altura_tooltip - pad;
+        } else {
+            y_tooltip = y_tooltip + pad
+        }
+    
+        $tooltip
+          .style('left', x_tooltip + 'px')
+          .style('top', y_tooltip + 'px');
+    };
+
+    function escondeTooltip(retangulo) {
+        d3.select("#tooltip").classed("hidden", true);
+    };    
 
 
 

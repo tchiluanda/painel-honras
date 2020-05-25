@@ -119,5 +119,9 @@ nav.controle-vis button:hover {
     border-bottom: 5px solid var(--cor-escura);
 }
 
+.hidden {
+    display: none;
+}
+
 
 
