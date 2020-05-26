@@ -38,7 +38,7 @@ dimensiona_container("agregado");
 
 d3.csv("dados/dados.csv").then(function(dados) {
     console.log(dados.columns);
-    // ["", "data", "tipo_divida", "Credor", "contrato", "tipo_credor", "mutuario", "tipo_mutuario", "Status", "valor", "mes", "ano", "mes_ano", "data_mes", "pos_ini_mutuario", "pos_ini_Credor", "pos_ini_tipo_divida", "pos_ini_ano"]
+    // ["", "data", "tipo_divida", "Credor_completo", "contrato", "tipo_credor", "mutuario", "tipo_mutuario", "Status", "valor", "mes", "ano", "mes_ano", "data_mes", "Credor", "nome_projeto", "top_mutuario", "pos_ini_mutuario", "pos_ini_Credor", "pos_ini_tipo_divida", "pos_ini_ano"]
     //console.log(dados[0]);
 
     //localStorage.setItem('dados', JSON.stringify(dados.map(d => ({"data": d.data, "mutuario": d.mutuario, "valor": +d.valor}))));
@@ -47,7 +47,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
     console.log(top_mutuarios);
 
 
-    dados.forEach((d,i) => dados[i].data = d3.timeParse("%Y-%m-%d")(d.data));
+    dados.forEach((d,i) => {dados[i].data = d3.timeParse("%Y-%m-%d")(d.data);
+                            dados[i]["data_br"] = d3.timeFormat("%d de %B de %Y")(dados[i].data);});
 
     console.log(dados[0]);
   
@@ -955,7 +956,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         simulacao.alpha(1).restart();
     };
 
-    function mostraTooltip(retangulo) {
+    function mostraTooltip(d) {
         let x_tooltip = +d3.select(this).attr('x');
         let y_tooltip = +d3.select(this).attr('y');
     
@@ -964,21 +965,17 @@ d3.csv("dados/dados.csv").then(function(dados) {
         let largura_tooltip_css = +$tooltip.style("width").substring(0, $tooltip.style("width").length-2);
         
         $tooltip.classed("hidden", false);
-
-        $tooltip.text(retangulo.mutuario)
     
         // popula informacao
-
-        /*
-    
-        const infos_tooltip = ["mutuario", "Credor", "tipo_divida", "ano", "projeto", "valor"];
+  
+        const infos_tooltip = ["mutuario", "Credor", "tipo_divida", "data_br", "nome_projeto", "valor"];
     
         infos_tooltip.forEach(function(info) {
             let text = "";
-            if (info == "valor") text = formata_vlr_tooltip(d[info])
+            if (info == "valor") text = valor_formatado(d[info])
             else text = d[info];
-            $tooltip.select("#tooltip-"+info).text(text);
-        }) */
+            $tooltip.select("#tt-"+info).text(text);
+        })
     
         // now that the content is populated, we can capture the tooltip
         // height, so that we can optime the tt position.
@@ -1009,7 +1006,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .style('top', y_tooltip + 'px');
     };
 
-    function escondeTooltip(retangulo) {
+    function escondeTooltip(d) {
         d3.select("#tooltip").classed("hidden", true);
     };    
 

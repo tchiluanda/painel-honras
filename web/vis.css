@@ -16,14 +16,18 @@ div.vis-container {
 div#tooltip {
     position: absolute;
     background-color: var(--cor-clara);
-    color: var(--cor-escura);
+    color: var(-cor-fonte-tooltip);
     font-family: 'Merriweather Sans', sans-serif;
     font-size: 10px;
     width: 180px;
     border-radius: 4px;
-    padding: 3px 6px;
+    padding: 1em;
     pointer-events: none;   
     z-index: 1; 
+}
+
+div#tooltip * + * {
+    margin-top: .5em;
 }
 
 @media (max-width: 1080px) and (min-width: 580px) {
