@@ -468,7 +468,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
             w_scale.domain([0,1]); // já que agora é percentual
 
-            console.log(x_scale.domain());
+            console.log(dimensoes[classe_svg].w_scale.domain());
 
             let barras_destaque = d3.select("svg.vis-" + classe_svg)
                 .selectAll("rect." + classe_svg + ".destaques")
