@@ -439,6 +439,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
         const dados_filtrados = dados
             .filter(d => d[variavel_principal] == valor_destacado);
 
+        const total_valor_destacado = d3.sum(dados_filtrados, d => d.valor);
+        console.log(total_valor_destacado);
+
         const dados_aux1 = group_by_sum(dados_filtrados, variavel_aux1, "valor", variavel_aux1 != "ano");
 
         const dados_aux2 = group_by_sum(dados_filtrados, variavel_aux2, "valor", variavel_aux2 != "ano");
@@ -448,9 +451,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
         for (let i of [1,2]) {
             const classe_svg = "auxiliar" + i;
             const categoria = [variavel_aux1, variavel_aux2][i-1];
-            const dados_destaque = [dados_aux1, dados_aux2][i-1];
+            let dados_destaque = [dados_aux1, dados_aux2][i-1];
 
-            //console.log("dados destaque", categoria);
+            dados_destaque.forEach((d,i) => {
+                dados_destaque[i]["percentual"] = d.subtotal / total_valor_destacado;
+            });
+
+            console.log("dados destaque", categoria, dados_destaque);
             
             const y_scale = dimensoes[classe_svg].y_scale
                 .range(obtem_range_y(classe_svg, categoria))
@@ -458,6 +465,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
             const x_scale = dimensoes[classe_svg].x_scale;
             const w_scale = dimensoes[classe_svg].w_scale;
+
+            w_scale.domain([0,1]); // já que agora é percentual
+
+            console.log(x_scale.domain());
 
             let barras_destaque = d3.select("svg.vis-" + classe_svg)
                 .selectAll("rect." + classe_svg + ".destaques")
@@ -491,7 +502,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             barras_destaque
                 .transition()
                 .duration(duracao)
-                .attr("width", d => w_scale(d.subtotal) + 1);
+                .attr("width", d => w_scale(d.percentual) + 1);
 
             // oculta labels anteriores
 
@@ -504,13 +515,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
             let labels_destaque = d3.select("svg.vis-" + classe_svg)
                 .selectAll("text." + classe_svg + "-labels-destaques")
-                .data(dados_destaque, d => d.categoria);  
+                .data(dados_destaque, d => d.subtotal);  
                 
             labels_destaque
                 .exit()
-                .text("0 %")
+                .text("")
 
-            let labes_destaque_enter = labels_destaque
+            let labels_destaque_enter = labels_destaque
                 .enter()
                 .append("text")
                 .classed(classe_svg+"-labels-destaques", true)
@@ -520,22 +531,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 .duration(duracao)
                 .attr("opacity", 1);  
                 
-            labels_destaque = labels_destaque.merge(labes_destaque_enter);
+            labels_destaque = labels_destaque.merge(labels_destaque_enter);
            
             labels_destaque
-                .text(function(d) {
-
-                    const valor_destaque = d.subtotal;
-
-                    //console.log("dentro do cálculo do label de destaque", parametros[categoria].subtotais, parametros[categoria].subtotais.filter(e => e.categoria == d.categoria)[0].categoria, d.categoria);
-
-                    let valor_barra_total = parametros[categoria].subtotais.filter(e => e.categoria == d.categoria)[0].subtotal;
-
-                    let valor_percentual = !valor_barra_total ? 0 : 100* valor_destaque/valor_barra_total;
-
-                    return(formataBR_1(valor_percentual) + "%");             
-                })
-                .attr("x", d => x_scale(parametros[categoria].subtotais.filter(e => e.categoria == d.categoria)[0].subtotal) + 5);           
+                .text(d => d3.format(".0%")(d.percentual))
+                .attr("x", d => x_scale(0) + w_scale(d.percentual) + 5);           
         }
     }  
     
