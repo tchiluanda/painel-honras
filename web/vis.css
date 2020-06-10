@@ -1,12 +1,11 @@
 div.vis-container {
     position: relative;
     display: grid;
-    grid-template-rows: 2fr 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
     grid-template-columns: 70% 30%;
     grid-template-areas:
       "vis-principal vis-auxiliar1"
-      "vis-principal vis-auxiliar2"
-      "vis-timeline vis-timeline";
+      "vis-principal vis-auxiliar2";
     max-width: 1080px;
     margin: 0 auto;
     grid-gap: 5px;
@@ -32,12 +31,11 @@ div#tooltip * + * {
 
 @media (max-width: 1080px) and (min-width: 580px) {
     div.vis-container {
-        grid-template-rows: 2fr 1.5fr 1fr;
+        grid-template-rows: 2fr 1.5fr;
         grid-template-columns: 50% 50%;
         grid-template-areas:
         "vis-principal vis-principal"
-        "vis-auxiliar1 vis-auxiliar2"
-        "vis-timeline vis-timeline";
+        "vis-auxiliar1 vis-auxiliar2";
         gap: 0;
         grid-gap: 0;
 
@@ -46,13 +44,12 @@ div#tooltip * + * {
 
 @media (max-width: 579px) {
     div.vis-container {
-        grid-template-rows: 2fr 1.5fr 1.5fr 1fr;
+        grid-template-rows: 2fr 1.5fr 1.5fr;
         grid-template-columns: 100%;
         grid-template-areas:
         "vis-principal"
         "vis-auxiliar1"
-        "vis-auxiliar2"
-        "vis-timeline";
+        "vis-auxiliar2";
     }
 }
 
@@ -80,11 +77,6 @@ svg.vis-auxiliar1 {
 
 svg.vis-auxiliar2 {
     grid-area: vis-auxiliar2;
-}
-
-svg.vis-timeline {
-    grid-area: vis-timeline;
-
 }
 
 svg.vis-auxiliar1, svg.vis-auxiliar2 {
@@ -141,8 +133,7 @@ rect.subtotais.nao-destacado {
 }
 
 rect.auxiliar1.destaques,
-rect.auxiliar2.destaques,
-path.timeline-destaque {
+rect.auxiliar2.destaques {
     fill: var(--cor-escura);
     stroke: var(--cor-escura);
 }
