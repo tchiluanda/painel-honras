@@ -877,7 +877,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     //////////////////////
     // para dar início!
 
-    let ultimo_estado = "mutuario";
+    let ultimo_estado = "ano";
     let ultima_selecao = "agregado";
 
     // fiz essa função para poder amarrar um listener de tamanho da janela;
