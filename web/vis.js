@@ -10,7 +10,7 @@ function dimensiona_container(opcao) {
     let altura_nav = d3.select("div.grupo-controles").node().offsetHeight;
     let altura_janela = window.innerHeight;
 
-    let altura_container_vis = altura_janela - altura_logo - altura_nav; //- altura_header 
+    let altura_container_vis = altura_janela - altura_logo - altura_nav - 20; //- altura_header 
     // atenção! a margen não entra nesse cálculo, então é importante zerar as margens verticais entre os elementos sendo medidos.
     //console.log(altura_container_vis);
 
