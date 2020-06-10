@@ -14,7 +14,7 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_atrasos.csv",
+honras <- read.csv2("./R/relatorio_honras_2020_05.csv",
                     skip = 10, stringsAsFactors = FALSE)
 
 names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato", 
@@ -24,7 +24,7 @@ names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato",
                    "Honra - Juros/Encargos (Moeda de Origem)", "Honra - Mora (Moeda de Origem)", 
                    "Honra - Total (Moeda de Origem)", "Honra - Principal (R$)", 
                    "Honra Juros/Encargos (R$)", "Honra - Mora (R$)", "Honra - Total (R$)", 
-                   "Ano Regularização", "Mês Regularização", "X24")
+                   "Ano Regularização", "Mês Regularização")
 
 info_cadastrais_raw <- read.csv2("./R/info_cadastrais_2020_04.csv",
                              skip = 10, stringsAsFactors = FALSE)
@@ -37,17 +37,19 @@ info_cadastrais <- info_cadastrais_raw %>%
 
 credor_siglas <- data.frame(
   Credor = unique(honras$Credor),
-  Credor_sigla = c("Caixa Econômica", 
+  Credor_sigla = c("Caixa Econômica",
+                   "Banco Mundial",
+                   "CAF",
                    "BID", 
                    "BNDES", 
-                   "Banco Mundial",
-                   "Banco do Nordeste",
                    "Banco do Brasil",
-                   "CAF",
-                   "Credit Suisse (Externo)",
                    "FONPLATA",
+                   "Bilbao Vizcaya",
+                   "Capitalia",
                    "AFD",
-                   "Credit Suisse (Interno",
+                   "Banco do Nordeste",
+                   "Credit Suisse (Externo)",
+                   "Credit Suisse (Interno)",
                    "JICA",
                    "Bank of America"),
   stringsAsFactors = FALSE
