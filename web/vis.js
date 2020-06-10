@@ -534,7 +534,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             labels_destaque = labels_destaque.merge(labels_destaque_enter);
            
             labels_destaque
-                .text(d => d3.format(".0%")(d.percentual))
+                .text(d => d3.format(".001%")(d.percentual))
                 .attr("x", d => x_scale(0) + w_scale(d.percentual) + 5);           
         }
     }  
