@@ -313,6 +313,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
         // se a função estiver sendo chamada para desenhar os gráficos auxiliares, será preciso criar / atualizar um novo eixo.
         if (classe_svg != "principal") {
             desenha_eixo_y(classe_svg, y_scale);
+
+            //remove barras de destaque
+            d3.select("svg.vis-" + classe_svg)
+                .selectAll("rect." + classe_svg + ".destaques")
+                .transition()
+                .duration(duracao)
+                .attr("width", 0)
+                .remove();
         }
 
         const x_scale = dimensoes[classe_svg].x_scale;
@@ -321,7 +329,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         // remove as barras de subtotais preexistentes
 
         let barras_subtotais = d3.select("svg.vis-" + classe_svg)
-            .selectAll("rect." + classe_svg)
+            .selectAll("rect." + classe_svg + ".subtotais")
             .data(dados, d => d.categoria);
 
         barras_subtotais
@@ -464,11 +472,24 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 .domain(parametros[categoria].dominios);
 
             const x_scale = dimensoes[classe_svg].x_scale;
-            const w_scale = dimensoes[classe_svg].w_scale;
+            const w_scale_local = d3.scaleLinear(); // tô criando uma nova, para evitar o problema que estava acontecendo de eu achar que estava criando uma cópia local, mas quando eu alterava o domínio da função escala supostamente local, ele alterava o domínio da função escala que está láaa no objeto de referência
+            
+            w_scale_local.range(dimensoes[classe_svg].w_scale.range()); // pego o range da função lá do meu objeto
 
-            w_scale.domain([0,1]); // já que agora é percentual
+            w_scale_local.domain([0,1]); // já que agora é percentual
 
             console.log(dimensoes[classe_svg].w_scale.domain());
+
+            //remove barras de subtotais
+
+            d3.select("svg.vis-" + classe_svg)
+              .selectAll("rect." + classe_svg + ".subtotais")
+              .transition()
+              .duration(duracao)
+              .attr("width", 0)
+              .remove();
+
+            //acrescentas as de destaque
 
             let barras_destaque = d3.select("svg.vis-" + classe_svg)
                 .selectAll("rect." + classe_svg + ".destaques")
@@ -502,7 +523,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             barras_destaque
                 .transition()
                 .duration(duracao)
-                .attr("width", d => w_scale(d.percentual) + 1);
+                .attr("width", d => w_scale_local(d.percentual) + 1);
 
             // oculta labels anteriores
 
@@ -535,7 +556,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
            
             labels_destaque
                 .text(d => d3.format(".001%")(d.percentual))
-                .attr("x", d => x_scale(0) + w_scale(d.percentual) + 5);           
+                .attr("x", d => x_scale(0) + w_scale_local(d.percentual) + 5);           
         }
     }  
     
