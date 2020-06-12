@@ -339,15 +339,19 @@ d3.csv("dados/dados.csv").then(function(dados) {
         // inclui as barras de subtotais por cima
         // as lógicas tratam quando as barras de subtotais estão nos paineis auxiliares. nesses casos, não caro que apareçam, mas que cresçam (como efeito de entrada)
 
-        barras_subtotais
+        let barras_subtotais_enter = barras_subtotais
             .enter()
             .append("rect")
             .classed(classe_svg, true)
+            .classed("subtotais", true); // fill e stroke definido em classes
+
+        barras_subtotais = barras_subtotais.merge(barras_subtotais_enter)
+
+        barras_subtotais_enter
             .attr("x", d => x_scale(0))
             .attr("y", d => y_scale(d.categoria))
             .attr("height", 0.75 * dimensoes[classe_svg].altura_barras)
             .attr("width", d => classe_svg != "principal" ? 0 : w_scale(d.subtotal) + 1)
-            .classed("subtotais", true) // fill e stroke definido em classes
             .attr("stroke-width", classe_svg == "principal" ? 2 : 0)
             .attr("opacity", d => classe_svg != "principal" ? 1 : 0)
             .transition()
