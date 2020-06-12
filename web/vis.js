@@ -347,7 +347,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         barras_subtotais = barras_subtotais.merge(barras_subtotais_enter)
 
-        barras_subtotais_enter
+        barras_subtotais
             .attr("x", d => x_scale(0))
             .attr("y", d => y_scale(d.categoria))
             .attr("height", 0.75 * dimensoes[classe_svg].altura_barras)
