@@ -51,6 +51,10 @@ div#tooltip * + * {
         "vis-auxiliar1"
         "vis-auxiliar2";
     }
+
+    #det-timeline {
+        display: none;
+    }
 }
 
 svg {
