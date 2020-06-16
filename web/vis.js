@@ -1,6 +1,10 @@
 const $ultima_data = d3.select("span.js--ultima-data");
 const $qde_honras  = d3.select("strong.js--qde-honras");
 
+let font_size = +d3.select(":root").style("font-size").slice(0,-2);
+const largura_mobile = 580;
+let mobile = window.innerWidth <= largura_mobile;
+
 ///////////////////////////////////////////////////
 // define tamanho do container do grid
 
@@ -28,6 +32,9 @@ function dimensiona_container(opcao) {
 
     console.log(opcao, altura_container_vis);
 
+    mobile = window.innerWidth <= largura_mobile;
+    font_size = mobile ? 9.6 : font_size
+
     d3.select(".vis-container").style("height", altura_container_vis + "px");
 }
 
@@ -51,6 +58,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
                             dados[i]["data_br"] = d3.timeFormat("%d de %B de %Y")(dados[i].data);});
 
     console.log(dados[0]);
+
+    const TOTAL = d3.sum(dados, d => d.valor);
+    
+    const DATA_ATUALIZACAO = d3.timeFormat("%B de %Y")(d3.max(dados, d => d.data));
+
+    console.log(TOTAL, DATA_ATUALIZACAO);
+    
   
 
     ///////////////////////////////////////////////////
@@ -383,6 +397,32 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     }
 
+    function complementa_ano() {
+        const altura_necessaria_barras = dimensoes['principal'].altura_barras * parametros['ano'].quantidade;
+        const posicao_top = margens['principal'].top + altura_necessaria_barras + 20;
+
+        if (d3.select("text.d3-total-acumulado").nodes().length == 0) {
+            d3.select("svg.vis-principal")
+                .append("text")
+                .classed("d3-total-acumulado", true)
+                .attr("x", mobile ? 30 : margens['principal'].left)
+                .attr("y", posicao_top)
+                .text("Valor total honrado: R$ " + valor_formatado(TOTAL) + ", até " + DATA_ATUALIZACAO)
+                .attr("opacity", 0)
+                .style("font-size", font_size + "px")
+                .append("tspan")
+                .attr("x", mobile ? 30 : margens['principal'].left)
+                .attr("y", posicao_top + font_size * 1.5)
+                .text("Clique na barra de um exercício para visualizar os valores mensais");
+        }
+
+        d3.select("text.d3-total-acumulado")
+          .transition()
+          .delay(duracao*3)
+          .duration(duracao)
+          .attr("opacity", 1)
+    }
+
     function desenha_principal(categoria) {
 
         // ajusta escalas
@@ -437,6 +477,12 @@ d3.csv("dados/dados.csv").then(function(dados) {
           //(1) armazeno uma propriedade "lado" em dados para usar na simulacao
 
         desenha_subtotais("principal", categoria);
+
+        if (categoria == 'ano') complementa_ano()
+        else d3.select("text.d3-total-acumulado")
+            .transition()
+            .duration(duracao)
+            .attr("opacity", 0)
        
     }
 
@@ -600,7 +646,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     function remove_para_modo_detalhado() {
         d3.selectAll("svg.vis-auxiliar1, svg.vis-auxiliar2").selectAll("*").remove();
-        d3.select("svg.vis-principal").selectAll(".axis, .principal-labels, .subtotais").remove();
+        d3.select("svg.vis-principal").selectAll(".axis, .principal-labels, .subtotais, text.d3-total-acumulado").remove();
     }
 
     function redimensiona_svgs(opcao) {
@@ -979,6 +1025,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     });
 
+    
+
 
 
     ///////////////////////
@@ -989,5 +1037,6 @@ d3.csv("dados/dados.csv").then(function(dados) {
     // d3.select("svg.vis-principal").selectAll("rect.principal").on("click", function(){console.log(d3.select(this).data())})
 
     // d3.select("svg.vis-principal").selectAll("g.axis text").attr("fill", (d,i) => d == "Goiás" ? "coral" : "blue")
+    console.log(dimensoes, parametros);
 
 });
