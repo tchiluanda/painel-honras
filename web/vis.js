@@ -8,6 +8,11 @@ let mobile = window.innerWidth <= largura_mobile;
 ///////////////////////////////////////////////////
 // define tamanho do container do grid
 
+// objetos importantes:
+// * parametros : para cada variável, vai informar domínios, subtotais, quantidades, máximos.
+// * margens
+// * dimensões: para cada svg, vai informar altura, largura, inicializa escalas etc.
+
 function dimensiona_container(opcao) {
     let altura_logo = d3.select("header.logo").node().offsetHeight;
     //let altura_header = d3.select("main>header").node().offsetHeight;
@@ -33,8 +38,8 @@ function dimensiona_container(opcao) {
     console.log(opcao, altura_container_vis);
 
     mobile = window.innerWidth <= largura_mobile;
-    font_size = mobile ? 9.6 : font_size
-
+    font_size = mobile ? 9.6 : 12.8;
+    
     d3.select(".vis-container").style("height", altura_container_vis + "px");
 }
 
@@ -132,7 +137,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
             top : 10,
             right : 50,
             bottom: 10,
-            left: 140
+            left: 140,
+            left_mobile: 30
         },
         
         auxiliar1 : { 
@@ -194,7 +200,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     dimensiona_vis();
     
-    //console.log(dimensoes);   
+    console.log(dimensoes);   
 
     ///////////////////////////////////////////////////
     // estados
@@ -405,22 +411,28 @@ d3.csv("dados/dados.csv").then(function(dados) {
             d3.select("svg.vis-principal")
                 .append("text")
                 .classed("d3-total-acumulado", true)
-                .attr("x", mobile ? 30 : margens['principal'].left)
-                .attr("y", posicao_top)
-                .text("Valor total honrado: R$ " + valor_formatado(TOTAL) + ", até " + DATA_ATUALIZACAO)
                 .attr("opacity", 0)
-                .style("font-size", font_size + "px")
-                .append("tspan")
-                .attr("x", mobile ? 30 : margens['principal'].left)
-                .attr("y", posicao_top + font_size * 1.5)
-                .text("Clique na barra de um exercício para visualizar os valores mensais");
         }
+
+        d3.select("svg.vis-principal").select("text.d3-total-acumulado")
+            .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
+            .attr("y", posicao_top)
+            .text("Valor total honrado: R$ " + valor_formatado(TOTAL) + ", até " + DATA_ATUALIZACAO)
+            .style("font-size", font_size + "px")
+            .append("tspan")
+            .attr("x", mobile ? 30 : margens['principal'].left)
+            .attr("y", posicao_top + font_size * 1.5)
+            .text("Clique na barra de um exercício para visualizar os valores mensais");
 
         d3.select("text.d3-total-acumulado")
           .transition()
           .delay(duracao*3)
           .duration(duracao)
           .attr("opacity", 1)
+
+        dimensoes["principal"]["pos_inicial_meses"] = posicao_top + font_size * 2.5 + 20;
+
+        console.log(dimensoes)
     }
 
     function desenha_principal(categoria) {
@@ -486,13 +498,27 @@ d3.csv("dados/dados.csv").then(function(dados) {
        
     }
 
+    function desenha_meses(ano_selecionado) {
+        console.log("hmm, ok, vamos desenhar o ano " + ano_selecionado);
+
+        console.log(dimensoes['principal'].pos_inicial_meses)
+
+        d3.select("svg.vis-principal").append("rect")
+          .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
+          .attr("y", dimensoes['principal'].pos_inicial_meses)
+          .attr('width', dimensoes['principal'].w_numerico - margens['principal'].right - margens['principal'].left)
+          .attr('height', dimensoes['principal'].h_numerico - margens['principal'].bottom - dimensoes['principal']["pos_inicial_meses"])
+          .attr("fill", "blue");
+    }
+
     function desenha_destaques(valor_destacado) {
 
         const variavel_principal = ultimo_estado;
         const variavel_aux1 = estado[ultimo_estado].auxiliar1;
         const variavel_aux2 = estado[ultimo_estado].auxiliar2;
 
-        //console.log(variavel_principal, variavel_aux1, variavel_aux2);
+        // desenha gráfico dos meses
+        if (variavel_principal == "ano") desenha_meses(valor_destacado);
 
         const dados_filtrados = dados
             .filter(d => d[variavel_principal] == valor_destacado);
@@ -641,7 +667,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .attr("fill", d => d == categoria_selecionada ? "var(--cor-escura)" : "currentColor")
             .style("font-weight", d => d == categoria_selecionada ? "bold" : "normal");
 
-        desenha_destaques(categoria_selecionada);            
+        desenha_destaques(categoria_selecionada); 
     }
 
     function remove_para_modo_detalhado() {
