@@ -92,15 +92,15 @@ function gera_arco(x1,y1,x2,y2) {
 }
 
 function gera_grid(svg_ref, step) {
-  const w = svg_ref.attr("width");
-  const h = svg_ref.attr("height");
+  const w = d3.select(svg_ref).attr("width") | +d3.select(svg_ref).style("width").slice(0,-2);
+  const h = d3.select(svg_ref).attr("height") | +d3.select(svg_ref).style("height").slice(0,-2);
   console.log("svg dimensions", w, h);
 
   const grid_color = "limegreen";
   const vertical_color = "tomato";
   const horizontal_color = "dodgerblue";
 
-  const selecao = svg_ref.append("g").classed("grid-help", true);
+  const selecao = d3.select(svg_ref).append("g").classed("grid-help", true);
   for (let tick = 0; tick <= w; tick += step) {
     selecao.append("line")
       .attr("x1", tick)
