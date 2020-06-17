@@ -516,9 +516,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         console.log(dados_ano);
 
+        margem_esquerda = mobile ? margens['principal'].left_mobile : margens['principal'].left
+
         let x_meses = d3.scaleBand()
           .range([
-              mobile ? margens['principal'].left_mobile : margens['principal'].left,
+              margem_esquerda,
               dimensoes['principal'].w_numerico - margens['principal'].right
             ])
           .domain(localeDataBrasil.shortMonths);
@@ -541,9 +543,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
         if (!d3.select("rect.background-meses").node()) {
             d3.select("svg.vis-principal").append("rect")
             .classed("background-meses", true)
-            .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
+            .attr("x", margem_esquerda)
             .attr("y", dimensoes['principal'].pos_inicial_meses)
-            .attr('width', dimensoes['principal'].w_numerico - margens['principal'].right - margens['principal'].left)
+            .attr('width', dimensoes['principal'].w_numerico - margens['principal'].right - margem_esquerda)
             .attr('height', dimensoes['principal'].h_numerico - margens['principal'].bottom - dimensoes['principal']["pos_inicial_meses"])
             .attr("fill", "#efefef");
         }
