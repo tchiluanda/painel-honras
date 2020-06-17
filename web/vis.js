@@ -70,7 +70,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     console.log(TOTAL, DATA_ATUALIZACAO);
 
-    const VALOR_MAX_MENSAL = d3.max(group_by_sum(dados, "valor", "mes_ano"), d => d.subtotal);
+    const VALOR_MAX_MENSAL = d3.max(group_by_sum(dados, "mes_ano", "valor"), d => d.subtotal);
 
     console.log(VALOR_MAX_MENSAL);
     
@@ -530,13 +530,13 @@ d3.csv("dados/dados.csv").then(function(dados) {
               dimensoes['principal'].h_numerico - margens['principal'].bottom - 30,
               dimensoes['principal'].pos_inicial_meses + 30,
           ])
-          .domain(d3.extent(dados_ano, d => d.subtotal));
+          .domain([0, VALOR_MAX_MENSAL]);
 
         let h_meses = d3.scaleLinear()
           .range([
               0, 
               dimensoes['principal'].h_numerico - margens['principal'].bottom - 30 - dimensoes['principal'].pos_inicial_meses - 30])
-          .domain(d3.extent(dados_ano, d => d.subtotal));
+          .domain(y_meses.domain());
 
         if (!d3.select("rect.background-meses").node()) {
             d3.select("svg.vis-principal").append("rect")
