@@ -73,6 +73,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
     const VALOR_MAX_MENSAL = d3.max(group_by_sum(dados, "mes_ano", "valor"), d => d.subtotal);
 
     console.log(VALOR_MAX_MENSAL);
+
+    let SELECAO = null;
     
   
 
@@ -443,8 +445,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     function desenha_principal(categoria) {
 
-        // ajusta escalas
+        // zera selecao
+        SELECAO = null;
 
+        // ajusta escalas
+    
         color.domain(parametros[categoria].dominios)
 
         const y_scale = d3.scaleBand()
@@ -660,7 +665,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     }
 
     function remove_meses() {
-        d3.selectAll(".meses").transition(duration).attr("opacity", 0).remove();
+        d3.selectAll(".meses").transition(duracao).attr("opacity", 0).remove();
     }
 
     function desenha_destaques(valor_destacado) {
@@ -799,8 +804,12 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     function destaca_selecao(opcao) {
 
+
         categoria_selecionada = d3.select(opcao).data()[0].categoria;
         //console.log(categoria_selecionada);
+
+        SELECAO = categoria_selecionada;
+        console.log(SELECAO, "destaque selecao aqui")
 
         let posicao_selecionada;
 
@@ -1117,6 +1126,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     function desenha_estado_atual(opcao) {
         remove_labels();
+        remove_meses();
         desenha_principal(opcao);
         desenha_subtotais("auxiliar1", estado[opcao].auxiliar1);
         desenha_subtotais("auxiliar2", estado[opcao].auxiliar2);
@@ -1141,6 +1151,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 dimensiona_container(ultima_selecao);
                 dimensiona_vis();
                 desenha_estado_atual(ultimo_estado);
+                console.log({SELECAO});
+                if (SELECAO) desenha_destaques(categoria_selecionada);
             }
         } // ignora se estiver no modo detalhado
 
