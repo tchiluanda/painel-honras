@@ -142,7 +142,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
             right : 50,
             bottom: 10,
             left: 140,
-            left_mobile: 30
+            left_mobile: 10,
+            right_mobile: 10
         },
         
         auxiliar1 : { 
@@ -424,7 +425,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .text("Valor total honrado: R$ " + valor_formatado(TOTAL) + ", até " + DATA_ATUALIZACAO)
             .style("font-size", font_size + "px")
             .append("tspan")
-            .attr("x", mobile ? 30 : margens['principal'].left)
+            .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
             .attr("y", posicao_top + font_size * 1.5)
             .text("Clique na barra de um exercício para visualizar os valores mensais");
 
@@ -516,12 +517,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         console.log(dados_ano);
 
-        margem_esquerda = mobile ? margens['principal'].left_mobile : margens['principal'].left
+        let margem_esquerda = mobile ? margens['principal'].left_mobile : margens['principal'].left - 40;
+        let margem_direita = mobile ? margens['principal'].right_mobile : margens['principal'].right - 30;
+
+        let pad_vertical = mobile ? 20 : 50;
+        
 
         let x_meses = d3.scaleBand()
           .range([
-              margem_esquerda,
-              dimensoes['principal'].w_numerico - margens['principal'].right
+              margem_esquerda + mobile ? 50 : 60,
+              dimensoes['principal'].w_numerico - margem_direita
             ])
           .domain(localeDataBrasil.shortMonths);
 
@@ -529,15 +534,15 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         let y_meses = d3.scaleLinear()
           .range([
-              dimensoes['principal'].h_numerico - margens['principal'].bottom - 30,
-              dimensoes['principal'].pos_inicial_meses + 30,
+              dimensoes['principal'].h_numerico - margens['principal'].bottom - pad_vertical,
+              dimensoes['principal'].pos_inicial_meses + pad_vertical,
           ])
           .domain([0, VALOR_MAX_MENSAL]);
 
         let h_meses = d3.scaleLinear()
           .range([
               0, 
-              dimensoes['principal'].h_numerico - margens['principal'].bottom - 30 - dimensoes['principal'].pos_inicial_meses - 30])
+              dimensoes['principal'].h_numerico - margens['principal'].bottom - pad_vertical - dimensoes['principal'].pos_inicial_meses - pad_vertical])
           .domain(y_meses.domain());
 
         if (!d3.select("rect.background-meses").node()) {
@@ -545,7 +550,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .classed("background-meses", true)
             .attr("x", margem_esquerda)
             .attr("y", dimensoes['principal'].pos_inicial_meses)
-            .attr('width', dimensoes['principal'].w_numerico - margens['principal'].right - margem_esquerda)
+            .attr('width', dimensoes['principal'].w_numerico - margem_direita - margem_esquerda)
             .attr('height', dimensoes['principal'].h_numerico - margens['principal'].bottom - dimensoes['principal']["pos_inicial_meses"])
             .attr("fill", "#efefef");
         }
@@ -574,20 +579,42 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .duration(duracao)
           .attr("height", d => h_meses(d.subtotal))
           .attr("y", d => y_meses(d.subtotal));
+      
+        if (!d3.select("g.x-axis-meses").node()) {
+            console.log("Criar eixo...");
 
-          let eixo_x = d3.axisBottom()
-            .scale(x_meses)
-            .tickFormat(d => formataData(d))
-                           .ticks(d3.timeMonth.every(1));
+            let eixo_x_meses = d3.axisBottom()
+                .scale(x_meses);
 
-        let $eixo_x = d3.select("svg.principal")
-        .append("g") 
-        .classed("axis", true)
-        .classed("x-axis-timeline", true);
+            d3.select("svg.vis-principal")
+                .append("g") 
+                .attr("transform", "translate(-" + 
+                x_meses.bandwidth()*0.5/2 + "," + 
+                (dimensoes['principal'].h_numerico - margens['principal'].bottom - pad_vertical) + ")")
+                .classed("axis", true)
+                .classed("x-axis-meses", true)
+                .call(eixo_x_meses); 
+                
+            let eixo_y_mes = d3.axisLeft()
+              .scale(y_meses)
+              .tickFormat(d => formataBR(d/1e6))
+              .ticks(mobile ? 5 : 10);
 
-        $eixo_x
-        .attr("transform", "translate(0," + (dimensoes["principal"].h_numerico - margens["principal"].bottom) + ")")
-        .call(eixo_x);
+            d3.select("svg.vis-principal")
+                .append("g")
+                .attr("transform", "translate(" + (x_meses.range()[0] - x_meses.bandwidth()*0.5/2) + ",0)")
+                .classed("axis", true)
+                .classed("axis-y-meses", true)
+                .call(eixo_y_mes);
+
+            d3.select(("svg.vis-principal"))
+                .select(".axis-y-meses .tick:last-of-type text").clone()
+                  .attr("x", 5)
+                  .attr("text-anchor", "start")
+                  .style("font-weight", "bold")
+                  .text("Valores mensais (R$ mi)");
+        }
+
 
     }
 
