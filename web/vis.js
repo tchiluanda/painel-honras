@@ -498,17 +498,80 @@ d3.csv("dados/dados.csv").then(function(dados) {
        
     }
 
-    function desenha_meses(ano_selecionado) {
+    function desenha_meses(ano_selecionado, dados_filtrados) {
         console.log("hmm, ok, vamos desenhar o ano " + ano_selecionado);
 
-        console.log(dimensoes['principal'].pos_inicial_meses)
+        console.log(dimensoes['principal'].pos_inicial_meses);
+
+        let dados_ano = group_by_sum(dados_filtrados, "data_mes", "valor");
+
+        dados_ano.forEach((d,i) => {
+            dados_ano[i]['as_date'] = d3.timeParse("%Y-%m-%d")(d.categoria)
+        });
+
+        console.log(dados_ano);
+
+        let x_meses = d3.scaleTime()
+          .range([
+              mobile ? margens['principal'].left_mobile : margens['principal'].left,
+              dimensoes['principal'].w_numerico - margens['principal'].right
+            ])
+          .domain(d3.extent(dados_ano, d => d.as_date));
+
+        console.log(x_meses.range(), x_meses.domain());
+
+        let y_meses = d3.scaleLinear()
+          .range([
+              dimensoes['principal'].h_numerico - margens['principal'].bottom - 30,
+              dimensoes['principal'].pos_inicial_meses + 30,
+          ])
+          .domain(d3.extent(dados_ano, d => d.subtotal));
+
+        let h_meses = d3.scaleLinear()
+          .range([
+              0, 
+              dimensoes['principal'].h_numerico - margens['principal'].bottom - 30 - dimensoes['principal'].pos_inicial_meses - 30])
+          .domain(d3.extent(dados_ano, d => d.subtotal));
 
         d3.select("svg.vis-principal").append("rect")
           .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
           .attr("y", dimensoes['principal'].pos_inicial_meses)
           .attr('width', dimensoes['principal'].w_numerico - margens['principal'].right - margens['principal'].left)
           .attr('height', dimensoes['principal'].h_numerico - margens['principal'].bottom - dimensoes['principal']["pos_inicial_meses"])
-          .attr("fill", "blue");
+          .attr("fill", "#efefef");
+
+        let $rect_meses = d3.select("svg.vis-principal").selectAll("rect.meses").data(dados_ano);
+
+        let $rect_meses_enter = $rect_meses.enter()
+          .append("rect")
+          .classed("meses", true)
+          .attr("y", dimensoes['principal'].h_numerico - margens['principal'].bottom - 30)
+          .attr("height", 0)
+
+        $rect_meses = $rect_meses.merge($rect_meses_enter)
+
+        $rect_meses
+          .attr("x", d => x_meses(d.as_date))
+          .attr("width", 10)
+          .transition()
+          .duration(1000)
+          .attr("height", d => h_meses(d.subtotal))
+          .attr("y", d => y_meses(d.subtotal));
+
+          let eixo_x = d3.axisBottom()
+            .scale(x_meses)
+            .tickFormat(d => formataData(d))
+                           .ticks(d3.timeMonth.every(1));
+
+        let $eixo_x = d3.select("svg.principal")
+        .append("g") 
+        .classed("axis", true)
+        .classed("x-axis-timeline", true);
+
+        $eixo_x
+        .attr("transform", "translate(0," + (dimensoes["principal"].h_numerico - margens["principal"].bottom) + ")")
+        .call(eixo_x);
+
     }
 
     function desenha_destaques(valor_destacado) {
@@ -517,11 +580,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
         const variavel_aux1 = estado[ultimo_estado].auxiliar1;
         const variavel_aux2 = estado[ultimo_estado].auxiliar2;
 
-        // desenha gráfico dos meses
-        if (variavel_principal == "ano") desenha_meses(valor_destacado);
-
         const dados_filtrados = dados
             .filter(d => d[variavel_principal] == valor_destacado);
+
+        // desenha gráfico dos meses
+        if (variavel_principal == "ano") desenha_meses(valor_destacado, dados_filtrados);
 
         const total_valor_destacado = d3.sum(dados_filtrados, d => d.valor);
         console.log(total_valor_destacado);
