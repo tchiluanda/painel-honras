@@ -69,6 +69,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
     const DATA_ATUALIZACAO = d3.timeFormat("%B de %Y")(d3.max(dados, d => d.data));
 
     console.log(TOTAL, DATA_ATUALIZACAO);
+
+    const VALOR_MAX_MENSAL = d3.max(group_by_sum(dados, "valor", "mes_ano"), d => d.subtotal);
+
+    console.log(VALOR_MAX_MENSAL);
     
   
 
@@ -505,18 +509,19 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         let dados_ano = group_by_sum(dados_filtrados, "data_mes", "valor");
 
+        // esse objeto localeDataBrasil está definido em "utils.js"
         dados_ano.forEach((d,i) => {
-            dados_ano[i]['as_date'] = d3.timeParse("%Y-%m-%d")(d.categoria)
+            dados_ano[i]['mes'] = localeDataBrasil.shortMonths[+d.categoria.slice(5,7)-1];
         });
 
         console.log(dados_ano);
 
-        let x_meses = d3.scaleTime()
+        let x_meses = d3.scaleBand()
           .range([
               mobile ? margens['principal'].left_mobile : margens['principal'].left,
               dimensoes['principal'].w_numerico - margens['principal'].right
             ])
-          .domain(d3.extent(dados_ano, d => d.as_date));
+          .domain(localeDataBrasil.shortMonths);
 
         console.log(x_meses.range(), x_meses.domain());
 
@@ -533,28 +538,38 @@ d3.csv("dados/dados.csv").then(function(dados) {
               dimensoes['principal'].h_numerico - margens['principal'].bottom - 30 - dimensoes['principal'].pos_inicial_meses - 30])
           .domain(d3.extent(dados_ano, d => d.subtotal));
 
-        d3.select("svg.vis-principal").append("rect")
-          .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
-          .attr("y", dimensoes['principal'].pos_inicial_meses)
-          .attr('width', dimensoes['principal'].w_numerico - margens['principal'].right - margens['principal'].left)
-          .attr('height', dimensoes['principal'].h_numerico - margens['principal'].bottom - dimensoes['principal']["pos_inicial_meses"])
-          .attr("fill", "#efefef");
+        if (!d3.select("rect.background-meses").node()) {
+            d3.select("svg.vis-principal").append("rect")
+            .classed("background-meses", true)
+            .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
+            .attr("y", dimensoes['principal'].pos_inicial_meses)
+            .attr('width', dimensoes['principal'].w_numerico - margens['principal'].right - margens['principal'].left)
+            .attr('height', dimensoes['principal'].h_numerico - margens['principal'].bottom - dimensoes['principal']["pos_inicial_meses"])
+            .attr("fill", "#efefef");
+        }
 
-        let $rect_meses = d3.select("svg.vis-principal").selectAll("rect.meses").data(dados_ano);
+        let $rect_meses = d3.select("svg.vis-principal").selectAll("rect.valores-meses").data(dados_ano, d => d.mes);
+
+        $rect_meses.exit()
+          .transition()
+          .duration(duracao)
+          .attr("height", 0)
+          .attr("y", y_meses(0))
+          .remove();
 
         let $rect_meses_enter = $rect_meses.enter()
           .append("rect")
-          .classed("meses", true)
-          .attr("y", dimensoes['principal'].h_numerico - margens['principal'].bottom - 30)
-          .attr("height", 0)
+          .classed("valores-meses", true)
+          .attr("y", y_meses(0))
+          .attr("height", 0);
 
         $rect_meses = $rect_meses.merge($rect_meses_enter)
 
         $rect_meses
-          .attr("x", d => x_meses(d.as_date))
-          .attr("width", 10)
+          .attr("x", d => x_meses(d.mes))
+          .attr("width", x_meses.bandwidth()*0.5)
           .transition()
-          .duration(1000)
+          .duration(duracao)
           .attr("height", d => h_meses(d.subtotal))
           .attr("y", d => y_meses(d.subtotal));
 

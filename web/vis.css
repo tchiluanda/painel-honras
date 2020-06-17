@@ -121,7 +121,8 @@ text.principal-labels.label-destacado {
     font-weight: bold;
 }
 
-rect.subtotais {
+rect.subtotais,
+rect.valores-meses {
     fill: var(--cor-clara);
 }
 
