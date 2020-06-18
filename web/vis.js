@@ -833,6 +833,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     function remove_para_modo_detalhado() {
         d3.selectAll("svg.vis-auxiliar1, svg.vis-auxiliar2").selectAll("*").remove();
+        remove_meses();
         d3.select("svg.vis-principal").selectAll(".axis, .principal-labels, .subtotais, text.d3-total-acumulado").remove();
     }
 
