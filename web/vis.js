@@ -445,9 +445,6 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     function desenha_principal(categoria) {
 
-        // zera selecao
-        SELECAO = null;
-
         // ajusta escalas
     
         color.domain(parametros[categoria].dominios)
@@ -509,8 +506,12 @@ d3.csv("dados/dados.csv").then(function(dados) {
        
     }
 
-    function desenha_meses(ano_selecionado, dados_filtrados) {
+    function desenha_meses(ano_selecionado, dados_filtrados, resize) {
         console.log("hmm, ok, vamos desenhar o ano " + ano_selecionado);
+        if (resize) {
+            console.log("Redesenhando por causa de resize.");
+            console.log("Dentro do desenha_meses. ", d3.selectAll(".meses"))
+        }
 
         console.log(dimensoes['principal'].pos_inicial_meses);
 
@@ -665,10 +666,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
     }
 
     function remove_meses() {
-        d3.selectAll(".meses").transition(duracao).attr("opacity", 0).remove();
+        console.log("Removendo tudo dos meses")
+        d3.selectAll(".meses")
+          .transition(duracao)
+          .attr("opacity", 0);
+        d3.selectAll(".meses")  
+          .remove();
+        console.log("Dentro do remove. ", d3.selectAll(".meses"))
     }
 
-    function desenha_destaques(valor_destacado) {
+    function desenha_destaques(valor_destacado, resize) {
 
         const variavel_principal = ultimo_estado;
         const variavel_aux1 = estado[ultimo_estado].auxiliar1;
@@ -678,7 +685,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .filter(d => d[variavel_principal] == valor_destacado);
 
         // desenha gráfico dos meses
-        if (variavel_principal == "ano") desenha_meses(valor_destacado, dados_filtrados);
+        if (variavel_principal == "ano") desenha_meses(valor_destacado, dados_filtrados, resize);
 
         const total_valor_destacado = d3.sum(dados_filtrados, d => d.valor);
         console.log(total_valor_destacado);
@@ -1145,6 +1152,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     let altura_janela_anterior = window.innerHeight;
 
     function resize_init() {
+        console.log("RESIZE!")
         if (ultima_selecao == "agregado") { 
             if ((window.innerWidth < 1080) & (window.innerHeight != altura_janela_anterior)) {
             }
@@ -1153,7 +1161,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 dimensiona_vis();
                 desenha_estado_atual(ultimo_estado);
                 console.log({SELECAO});
-                if (SELECAO) desenha_destaques(categoria_selecionada);
+                if (SELECAO) {
+                    console.log("tem seleção, vou desenhar os destaques")
+                    desenha_destaques(categoria_selecionada, "resize");
+                };
             }
         } // ignora se estiver no modo detalhado
 
@@ -1178,6 +1189,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
       //console.log(opcao, this.id, this);
       ultimo_estado = opcao;
+
+      // zera selecao
+      SELECAO = null;
 
       desenha_estado_atual(opcao)
     });
