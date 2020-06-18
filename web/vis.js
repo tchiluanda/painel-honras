@@ -33,9 +33,7 @@ function dimensiona_container(opcao) {
     
         altura_container_vis = altura_container_vis < 530 ? 530 : altura_container_vis;
     
-    } // ou seja,se estiver no modo detalhado, usar altura do viewport
-
-    console.log(opcao, altura_container_vis);
+    } // ou seja,se estiver no modo detalhado, usar altura do viewport  
 
     mobile = window.innerWidth <= largura_mobile;
     font_size = mobile ? 9.6 : 12.8;
@@ -56,8 +54,6 @@ d3.csv("dados/dados.csv").then(function(dados) {
     //localStorage.setItem('dados', JSON.stringify(dados.map(d => ({"data": d.data, "mutuario": d.mutuario, "valor": +d.valor}))));
 
     let top_mutuarios = group_by_sum(dados, "top_mutuario", "valor", true).map(d => d.categoria);
-    console.log(top_mutuarios);
-
 
     dados.forEach((d,i) => {dados[i].data = d3.timeParse("%Y-%m-%d")(d.data);
                             dados[i]["data_br"] = d3.timeFormat("%d de %B de %Y")(dados[i].data);});
@@ -68,11 +64,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     
     const DATA_ATUALIZACAO = d3.timeFormat("%B de %Y")(d3.max(dados, d => d.data));
 
-    console.log(TOTAL, DATA_ATUALIZACAO);
-
     const VALOR_MAX_MENSAL = d3.max(group_by_sum(dados, "mes_ano", "valor"), d => d.subtotal);
-
-    console.log(VALOR_MAX_MENSAL);
 
     let SELECAO = null;
     
@@ -439,8 +431,6 @@ d3.csv("dados/dados.csv").then(function(dados) {
           .attr("opacity", 1)
 
         dimensoes["principal"]["pos_inicial_meses"] = posicao_top + font_size * 2.5 + 20;
-
-        console.log(dimensoes)
     }
 
     function desenha_principal(categoria) {
@@ -506,14 +496,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
        
     }
 
-    function desenha_meses(ano_selecionado, dados_filtrados, resize) {
-        console.log("hmm, ok, vamos desenhar o ano " + ano_selecionado);
-        if (resize) {
-            console.log("Redesenhando por causa de resize.");
-            console.log("Dentro do desenha_meses. ", d3.selectAll(".meses"))
-        }
-
-        console.log(dimensoes['principal'].pos_inicial_meses);
+    function desenha_meses(ano_selecionado, dados_filtrados) {
+        
+        //console.log(dimensoes['principal'].pos_inicial_meses);
 
         let dados_ano = group_by_sum(dados_filtrados, "data_mes", "valor");
 
@@ -522,7 +507,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             dados_ano[i]['mes'] = localeDataBrasil.shortMonths[+d.categoria.slice(5,7)-1];
         });
 
-        console.log(dados_ano);
+        //console.log(dados_ano);
 
         let margem_esquerda = mobile ? margens['principal'].left_mobile : margens['principal'].left - 40;
         let margem_direita = mobile ? margens['principal'].right_mobile : margens['principal'].right - 30;
@@ -537,7 +522,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             ])
           .domain(localeDataBrasil.shortMonths);
 
-        console.log(x_meses.range()[0], margem_esquerda, "margem");
+        //console.log(x_meses.range()[0], margem_esquerda, "margem");
 
         let y_meses = d3.scaleLinear()
           .range([
@@ -624,7 +609,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
       
         if (!d3.select("g.x-axis-meses").node()) {
             // first time
-            console.log("Criar eixo...");
+            //console.log("Criar eixo...");
 
             d3.select("svg.vis-principal")
                 .append("text")
@@ -666,16 +651,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
     }
 
     function remove_meses() {
-        console.log("Removendo tudo dos meses")
+        //console.log("Removendo tudo dos meses")
         d3.selectAll(".meses")
           .transition(duracao)
           .attr("opacity", 0);
         d3.selectAll(".meses")  
           .remove();
-        console.log("Dentro do remove. ", d3.selectAll(".meses"))
+        //console.log("Dentro do remove. ", d3.selectAll(".meses"))
     }
 
-    function desenha_destaques(valor_destacado, resize) {
+    function desenha_destaques(valor_destacado) {
 
         const variavel_principal = ultimo_estado;
         const variavel_aux1 = estado[ultimo_estado].auxiliar1;
@@ -685,10 +670,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .filter(d => d[variavel_principal] == valor_destacado);
 
         // desenha gráfico dos meses
-        if (variavel_principal == "ano") desenha_meses(valor_destacado, dados_filtrados, resize);
+        if (variavel_principal == "ano") desenha_meses(valor_destacado, dados_filtrados);
 
         const total_valor_destacado = d3.sum(dados_filtrados, d => d.valor);
-        console.log(total_valor_destacado);
+        //console.log(total_valor_destacado);
 
         const dados_aux1 = group_by_sum(dados_filtrados, variavel_aux1, "valor", variavel_aux1 != "ano");
 
@@ -705,7 +690,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 dados_destaque[i]["percentual"] = d.subtotal / total_valor_destacado;
             });
 
-            console.log("dados destaque", categoria, dados_destaque);
+            //console.log("dados destaque", categoria, dados_destaque);
             
             const y_scale = dimensoes[classe_svg].y_scale
                 .range(obtem_range_y(classe_svg, categoria))
@@ -718,7 +703,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
             w_scale_local.domain([0,1]); // já que agora é percentual
 
-            console.log(dimensoes[classe_svg].w_scale.domain());
+            //console.log(dimensoes[classe_svg].w_scale.domain());
 
             //remove barras de subtotais
 
@@ -816,7 +801,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
         //console.log(categoria_selecionada);
 
         SELECAO = categoria_selecionada;
-        console.log(SELECAO, "destaque selecao aqui")
+        //console.log(SELECAO, "destaque selecao aqui")
 
         let posicao_selecionada;
 
@@ -878,7 +863,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             dados[i]["y"] = +d3.select(this).attr("y");
         });
         rects_honras.attr("fill", "dodgerblue")
-        console.log("Primeiro y", dados[0].y, d3.select("svg.vis-principal").style("width"));
+        //console.log("Primeiro y", dados[0].y, d3.select("svg.vis-principal").style("width"));
     }
 
     function vai_para_detalhado(opcao) {
@@ -1160,10 +1145,10 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 dimensiona_container(ultima_selecao);
                 dimensiona_vis();
                 desenha_estado_atual(ultimo_estado);
-                console.log({SELECAO});
+                //console.log({SELECAO});
                 if (SELECAO) {
-                    console.log("tem seleção, vou desenhar os destaques")
-                    desenha_destaques(categoria_selecionada, "resize");
+                    //console.log("tem seleção, vou desenhar os destaques")
+                    desenha_destaques(categoria_selecionada);
                 };
             }
         } // ignora se estiver no modo detalhado
