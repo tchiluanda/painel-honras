@@ -142,14 +142,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         auxiliar1 : { 
             top : 8,
-            right: 75,
+            right: 80,
             bottom: 8,
             left: 100
         },
 
         auxiliar2 : { 
             top : 8,
-            right: 75,
+            right: 80,
             bottom: 8,
             left: 100
         }
