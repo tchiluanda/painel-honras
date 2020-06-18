@@ -676,8 +676,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
                     d3.select("svg.vis-principal").selectAll("g.x-axis-meses text")
                         .attr("fill", d => d == mes_selecionado ? "var(--cor-escura)" : "currentColor")
                         .style("font-weight", d => d == mes_selecionado ? "bold" : "normal");
-            
-                    //desenha_destaques(categoria_selecionada); 
+
+                    desenha_destaques(categoria_selecionada, mes_selecionado); 
             });
         }
     }
@@ -692,24 +692,34 @@ d3.csv("dados/dados.csv").then(function(dados) {
         //console.log("Dentro do remove. ", d3.selectAll(".meses"))
     }
 
-    function desenha_destaques(valor_destacado) {
+    function desenha_destaques(valor_destacado, mes_selecionado) {
 
         const variavel_principal = ultimo_estado;
         const variavel_aux1 = estado[ultimo_estado].auxiliar1;
         const variavel_aux2 = estado[ultimo_estado].auxiliar2;
 
-        const dados_filtrados = dados
+        let dados_filtrados = dados
             .filter(d => d[variavel_principal] == valor_destacado);
 
         // desenha gráfico dos meses
-        if (variavel_principal == "ano") desenha_meses(valor_destacado, dados_filtrados);
+        if (variavel_principal == "ano") {
+            if (mes_selecionado) {
+                dados_filtrados = dados_filtrados
+                  .filter(d => +d.mes == localeDataBrasil.shortMonths.indexOf(mes_selecionado)+1);
+                console.log(mes_selecionado, dados_filtrados);
+            } else desenha_meses(valor_destacado, dados_filtrados);
+        };
 
         const total_valor_destacado = d3.sum(dados_filtrados, d => d.valor);
         //console.log(total_valor_destacado);
 
         const dados_aux1 = group_by_sum(dados_filtrados, variavel_aux1, "valor", variavel_aux1 != "ano");
+        console.table(dados_aux1) 
+        console.log(d3.sum(dados_aux1, d => d.subtotal));
 
         const dados_aux2 = group_by_sum(dados_filtrados, variavel_aux2, "valor", variavel_aux2 != "ano");
+        console.table(dados_aux2)
+        console.log(d3.sum(dados_aux2, d => d.subtotal));
 
         //console.log("Dados para o destaque", dados_filtrados, dados_aux1, dados_aux2);
 
