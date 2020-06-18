@@ -36,6 +36,14 @@ const valor_formatado = function(x) {
   }
 }
 
+// com zero casas
+const valor_formatado0 = function(x) {
+  for (mult of obj_mult) {
+    const val = x/mult.valor;
+    if (val < 1000) return formataBR(val) + " " + mult.sufixo;
+  }
+}
+
 // datas
 
 d3.timeFormatDefaultLocale(localeDataBrasil);
