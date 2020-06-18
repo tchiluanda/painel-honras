@@ -573,6 +573,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
         $rect_meses
           .attr("x", d => x_meses(d.mes))
           .attr("width", x_meses.bandwidth()*0.5)
+          .classed("nao-destacado", false)
+          .classed("mes-destacado", false)
           .transition()
           .duration(duracao)
           .attr("height", d => h_meses(d.subtotal))
@@ -645,9 +647,39 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 .classed("axis-y-meses", true)
                 .classed("meses", true)
                 .call(eixo_y_mes);
+
+            // listener
+            d3.select("svg.vis-principal").selectAll("rect.valores-meses").on("click", function() {
+                
+                    const opcao = this;
+
+                    console.log(opcao);
+
+                    mes_selecionado = d3.select(opcao).data()[0].mes;
+
+                    console.log("Clicou na barra do mês", mes_selecionado);
+            
+                    let posicao_selecionada;
+            
+                    d3.select("svg.vis-principal").selectAll("rect.valores-meses")
+                        .classed("nao-destacado", function(d,i) {
+                            if (d.mes == mes_selecionado) posicao_selecionada = i;
+                            return (d.mes != mes_selecionado);
+                        });
+
+                    d3.select("svg.vis-principal").selectAll("rect.valores-meses")
+                        .classed("mes-destacado", d => d.mes == mes_selecionado);
+            
+                    d3.select("svg.vis-principal").selectAll("text.valores-meses")
+                        .classed("label-destacado", d => d.mes == mes_selecionado);
+            
+                    d3.select("svg.vis-principal").selectAll("g.x-axis-meses text")
+                        .attr("fill", d => d == mes_selecionado ? "var(--cor-escura)" : "currentColor")
+                        .style("font-weight", d => d == mes_selecionado ? "bold" : "normal");
+            
+                    //desenha_destaques(categoria_selecionada); 
+            });
         }
-
-
     }
 
     function remove_meses() {

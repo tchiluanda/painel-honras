@@ -136,7 +136,15 @@ rect.subtotais.principal {
     cursor: pointer;
 }
 
-rect.subtotais.nao-destacado {
+rect.valores-meses {
+    cursor: pointer;
+}
+rect.valores-meses.mes-destacado {
+    fill: var(--cor-escura);
+}
+
+rect.subtotais.nao-destacado,
+rect.valores-meses.nao-destacado {
     fill: var(--cor-cinza-clara);
     stroke: var(--cor-cinza-clara);
 }
