@@ -158,3 +158,24 @@ plota_sumario(mutuario)
 plota_sumario(Credor)
 plota_sumario(tipo_divida)
 plota_sumario(ano)
+
+
+# verifica subtotais meses ------------------------------------------------
+
+honras_pre %>% 
+  filter(ano == 2019, mes == "08") %>% 
+  mutate(total = sum(valor)) %>% 
+  group_by(Credor) %>% 
+  summarise(subtotal = sum(valor),
+            total = first(total)) %>%
+  ungroup() %>%
+  mutate(pct = scales::percent(subtotal / total))
+
+honras_pre %>% 
+  filter(mutuario == "Pernambuco") %>% 
+  mutate(total = sum(valor)) %>% 
+  group_by(Credor) %>% 
+  summarise(subtotal = sum(valor),
+            total = first(total)) %>%
+  ungroup() %>%
+  mutate(pct = scales::percent(subtotal / total))
