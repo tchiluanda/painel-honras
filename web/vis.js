@@ -142,14 +142,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         auxiliar1 : { 
             top : 8,
-            right: 35,
+            right: 75,
             bottom: 8,
             left: 100
         },
 
         auxiliar2 : { 
             top : 8,
-            right: 35,
+            right: 75,
             bottom: 8,
             left: 100
         }
@@ -706,7 +706,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             if (mes_selecionado) {
                 dados_filtrados = dados_filtrados
                   .filter(d => +d.mes == localeDataBrasil.shortMonths.indexOf(mes_selecionado)+1);
-                console.log(mes_selecionado, dados_filtrados);
+                //console.log(mes_selecionado, dados_filtrados);
             } else desenha_meses(valor_destacado, dados_filtrados);
         };
 
@@ -714,12 +714,12 @@ d3.csv("dados/dados.csv").then(function(dados) {
         //console.log(total_valor_destacado);
 
         const dados_aux1 = group_by_sum(dados_filtrados, variavel_aux1, "valor", variavel_aux1 != "ano");
-        console.table(dados_aux1) 
-        console.log(d3.sum(dados_aux1, d => d.subtotal));
+        //console.table(dados_aux1) 
+        //console.log(d3.sum(dados_aux1, d => d.subtotal));
 
         const dados_aux2 = group_by_sum(dados_filtrados, variavel_aux2, "valor", variavel_aux2 != "ano");
-        console.table(dados_aux2)
-        console.log(d3.sum(dados_aux2, d => d.subtotal));
+        //console.table(dados_aux2)
+        //console.log(d3.sum(dados_aux2, d => d.subtotal));
 
         //console.log("Dados para o destaque", dados_filtrados, dados_aux1, dados_aux2);
 
@@ -822,7 +822,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             labels_destaque = labels_destaque.merge(labels_destaque_enter);
            
             labels_destaque
-                .text(d => d3.format(".001%")(d.percentual))
+                .text(d => d3.format(".001%")(d.percentual) + " (R$ " + valor_formatado0(d.subtotal) + ")")
                 .attr("x", d => x_scale(0) + w_scale_local(d.percentual) + 5);           
         }
     }  
