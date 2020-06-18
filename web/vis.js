@@ -138,7 +138,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         timeline : {
             top : 10,
-            right: 20,
+            right: 25,
             bottom: 20,
             left: 40
         }
