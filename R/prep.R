@@ -56,7 +56,7 @@ credor_siglas <- data.frame(
 )
 
 honras_pre <- honras %>%
-  select(data = `Data de Vencimento`,
+  select(data = `Data Regularização do Atraso`,
          tipo_divida = `Tipo de Dívida`,
          `Credor`,
          contrato = `Nome do Contrato`,
