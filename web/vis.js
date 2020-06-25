@@ -105,6 +105,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     };
 
+    
     //console.log(parametros);
 
     ///////////////////////////////////////////////////
@@ -122,6 +123,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
     const cor_fundo_sim = d3.select(":root").style("--cor-fundo-sim");
     const cor_clara_sim = d3.select(":root").style("--cor-clara-sim");
     const cor_destaque = "coral";
+
+    let qdes = parametros._quantidades.sort((a,b) => a - b);
+    const segunda_maior_quantidade = qdes.slice(-2, -1)[0];
 
     ///////////////////////////////////////////////////
     // referencias, margens e dimensões dos svgs
@@ -169,7 +173,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
         const altura_liquida  = h_numerico - margem.top  - margem.bottom;
         const largura_liquida = w_numerico - margem.left - margem.right;
 
-        const altura_barras = (h_numerico - margem.bottom - margem.top) / max_quantidade;
+        const altura_barras = (h_numerico - margem.bottom - margem.top) / (classe_svg === "auxiliar2" ? segunda_maior_quantidade : max_quantidade);
+
+        console.log("um monte", classe_svg, (h_numerico - margem.bottom - margem.top), segunda_maior_quantidade, max_quantidade, altura_barras);
 
         return({
             "h": h, 
@@ -201,7 +207,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     dimensiona_vis();
     
-    console.log(dimensoes);   
+    console.log({dimensoes});   
 
     ///////////////////////////////////////////////////
     // estados
