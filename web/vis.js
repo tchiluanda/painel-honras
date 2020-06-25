@@ -5,6 +5,8 @@ let font_size = +d3.select(":root").style("font-size").slice(0,-2);
 const largura_mobile = 580;
 let mobile = window.innerWidth <= largura_mobile;
 
+let pad_titulo_ano = 30;
+
 ///////////////////////////////////////////////////
 // define tamanho do container do grid
 
@@ -325,9 +327,23 @@ d3.csv("dados/dados.csv").then(function(dados) {
         const dados = parametros[categoria].subtotais;
         //console.log("dados dentro de subtotais", categoria, dados)
 
-        const y_scale = dimensoes[classe_svg].y_scale
-          .range(obtem_range_y(classe_svg, categoria))
-          .domain(parametros[categoria].dominios);
+        const y_scale = d3.scaleBand();
+
+        if (categoria == "ano" && classe_svg == "principal") {
+            let range = obtem_range_y("principal", categoria);
+            y_scale            
+                .range([range[0]+pad_titulo_ano, range[1]+pad_titulo_ano]);
+        } else {
+            y_scale
+                .range(obtem_range_y(classe_svg, categoria));
+        }
+
+        y_scale
+          .domain(parametros[categoria].dominios);        
+
+        // const y_scale = dimensoes[classe_svg].y_scale
+        //   .range(obtem_range_y(classe_svg, categoria))
+        //   .domain(parametros[categoria].dominios);
 
         // se a função estiver sendo chamada para desenhar os gráficos auxiliares, será preciso criar / atualizar um novo eixo.
         if (classe_svg != "principal") {
@@ -404,31 +420,45 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     function complementa_ano() {
         const altura_necessaria_barras = dimensoes['principal'].altura_barras * parametros['ano'].quantidade;
-        const posicao_top = margens['principal'].top + altura_necessaria_barras + 20;
+        const posicao_top = margens['principal'].top + altura_necessaria_barras + 20 + pad_titulo_ano;
 
         if (d3.select("text.d3-total-acumulado").nodes().length == 0) {
             d3.select("svg.vis-principal")
                 .append("text")
                 .classed("d3-total-acumulado", true)
                 .classed("meses", true)
-                .attr("opacity", 0)
+                .attr("opacity", 0);
+
+            d3.select("svg.vis-principal")
+                .append("text")
+                .classed("d3-instrucoes-meses", true)
+                .classed("meses", true)
+                .attr("opacity", 0);
         }
 
         d3.select("svg.vis-principal").select("text.d3-total-acumulado")
             .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
-            .attr("y", posicao_top)
-            .text("Valor total honrado: R$ " + valor_formatado(TOTAL) + ", até " + DATA_ATUALIZACAO)
-            .style("font-size", font_size + "px")
-            .append("tspan")
+            .attr("y", margens['principal'].top + 15)
+            .text("Valor total honrado")
+            .style("font-size", (font_size + 2) + "px")
+              .append("tspan")
+              .text(" até " + DATA_ATUALIZACAO + ": ")
+                .append("tspan")
+                .classed("destaque", true)
+                .text("R$ "+valor_formatado(TOTAL));
+
+
+        d3.select("svg.vis-principal").select("text.d3-instrucoes-meses")
             .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
-            .attr("y", posicao_top + font_size * 1.5)
+            .attr("y", posicao_top)
+            .style("font-size", font_size + "px")
             .text("Clique na barra de um exercício para visualizar os valores mensais");
 
-        d3.select("text.d3-total-acumulado")
+        d3.selectAll("text.d3-total-acumulado,text.d3-instrucoes-meses")
           .transition()
           .delay(duracao*3)
           .duration(duracao)
-          .attr("opacity", 1)
+          .attr("opacity", 1);
 
         dimensoes["principal"]["pos_inicial_meses"] = posicao_top + font_size * 2.5 + 20;
     }
@@ -437,10 +467,20 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         // ajusta escalas
     
-        color.domain(parametros[categoria].dominios)
+        color.domain(parametros[categoria].dominios);
 
-        const y_scale = d3.scaleBand()
-          .range(obtem_range_y("principal", categoria))
+        const y_scale = d3.scaleBand();
+
+        if (categoria == "ano") {
+            let range = obtem_range_y("principal", categoria);
+            y_scale            
+                .range([range[0]+pad_titulo_ano, range[1]+pad_titulo_ano]);
+        } else {
+            y_scale
+                .range(obtem_range_y("principal", categoria));
+        }
+
+        y_scale
           .domain(parametros[categoria].dominios);
         
         // // para as bolhas
@@ -617,10 +657,14 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 .append("text")
                 .classed("meses", true)
                 .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
-                .attr("y", dimensoes['principal'].pos_inicial_meses - font_size)
-                .text("Valores em R$ milhões")
+                .attr("y", dimensoes['principal'].pos_inicial_meses - 2.5*font_size)               
                 .style("font-size", font_size + "px")
-                .style("font-style", "italic");
+                .text("Clique na barra de um mês para visualizar a distribuição")
+                  .append("tspan")
+                  .attr("dy", font_size*1.5)
+                  .attr("x", mobile ? margens['principal'].left_mobile : margens['principal'].left)
+                  .text("Valores em R$ milhões")
+                  .style("font-style", "italic");
 
             let eixo_x_meses = d3.axisBottom()
                 .scale(x_meses);

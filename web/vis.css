@@ -120,7 +120,8 @@ text.principal-labels {
     fill: var(--cor-cinza-escura);
 }
 
-text.principal-labels.label-destacado {
+text.principal-labels.label-destacado,
+tspan.destaque {
     fill: var(--cor-escura);
     font-weight: bold;
 }
