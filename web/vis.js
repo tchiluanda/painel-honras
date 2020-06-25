@@ -28,7 +28,7 @@ function dimensiona_container(opcao) {
     //console.log(altura_janela, altura_logo, altura_nav, altura_container_vis)
 
     if (opcao == "agregado") {
-        altura_container_vis = window.innerWidth < 1080 ? 950 : altura_container_vis;
+        altura_container_vis = window.innerWidth < 1080 ? 1100 : altura_container_vis;
         // se é menor que 1080, quer dizer que está no modo mobile do grid.
         // considerando o mínimo normal de 530, isso dá 424 para o painel principal, 212 para os auxiliares e 106 para a timeline.
         // então no modo mobile, considerando o empilhamento diferente do grid, precisaria de 424+212+212+106 = 954

@@ -44,7 +44,7 @@ div#tooltip * + * {
 
 @media (max-width: 579px) {
     div.vis-container {
-        grid-template-rows: 2fr 1.5fr 1.5fr;
+        grid-template-rows: 2fr 1.7fr 1.3fr;
         grid-template-columns: 100%;
         grid-template-areas:
         "vis-principal"
