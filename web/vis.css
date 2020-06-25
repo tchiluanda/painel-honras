@@ -2,7 +2,7 @@ div.vis-container {
     position: relative;
     display: grid;
     grid-template-rows: 1.2fr 0.8fr;
-    grid-template-columns: 70% 30%;
+    grid-template-columns: 65% 35%;
     grid-template-areas:
       "vis-principal vis-auxiliar1"
       "vis-principal vis-auxiliar2";
@@ -166,7 +166,7 @@ text.auxiliar1-labels,
 text.auxiliar2-labels,
 text.auxiliar1-labels-destaques,
 text.auxiliar2-labels-destaques {
-    font-size: 8px;
+    font-size: 10px;
 }
 
 text.auxiliar1-labels-destaques,

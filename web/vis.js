@@ -148,16 +148,16 @@ d3.csv("dados/dados.csv").then(function(dados) {
         
         auxiliar1 : { 
             top : 8,
-            right: 80,
+            right: 110,
             bottom: 8,
-            left: 100
+            left: 125
         },
 
         auxiliar2 : { 
             top : 8,
-            right: 80,
+            right: 110,
             bottom: 8,
-            left: 100
+            left: 125
         }
     };
 
