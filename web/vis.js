@@ -1102,7 +1102,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3))
             .force('charge', d3.forceManyBody().strength(carga))
             .force('colisao', d3.forceCollide().radius(d => d.raio))
-            .alphaMin(0.4)
+            .alphaMin(0.25)
             .on('tick', atualiza_tick);
         
         simulacao.stop()
