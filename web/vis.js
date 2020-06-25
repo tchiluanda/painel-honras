@@ -939,6 +939,9 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         d3.select("svg.vis-principal").selectAll("g.axis-detalhado").remove();
 
+        // remove total
+        d3.select("h2.total-detalhado").transition().duration(duracao).style("opacity", 0).remove();
+
         rects_honras
          .attr("stroke-width", null)
          .attr("stroke", null);
@@ -968,8 +971,24 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     ////////////////////////////////////////////////////////////////////////
     // BOLHAS
+
+    function inclui_total_modo_detalhado() {
+        let y_ultima_bolha = d3.max(rects_honras.nodes(), d => d.__data__.y)
+
+        d3.select(".vis-container").append("h2")
+            .classed("total-detalhado", true)
+            .style("left", 0)
+            .style("top", y_ultima_bolha + "px")
+            .text("Total honrado: R$ "+valor_formatado(TOTAL))
+            .style("opacity", 0)
+            .transition()
+            .duration(duracao)
+            .style("opacity", 1);
+    }
    
-    function desenha_detalhado() {  
+    function desenha_detalhado() { 
+        
+        let primeira_vez_sim = true;
           
         d3.select(":root")
             .transition()
@@ -1014,6 +1033,27 @@ d3.csv("dados/dados.csv").then(function(dados) {
         rects_honras
           .on('mouseover', mostraTooltip)
           .on('mouseout',  escondeTooltip);
+
+        
+        simulacao.on('end', function() {
+            if (primeira_vez_sim) {
+
+                let y_ultima_bolha = d3.max(rects_honras.nodes(), d => d.__data__.y)
+
+                d3.select(".vis-container").append("h2")
+                    .classed("total-detalhado", true)
+                    .style("left", 0)
+                    .style("top", y_ultima_bolha + "px")
+                    .text("Total honrado: R$ "+valor_formatado(TOTAL))
+                    .style("opacity", 0)
+                    .transition()
+                    .duration(duracao)
+                    .style("opacity", 1);
+            }
+            primeira_vez_sim = false;
+        });
+
+
     };
 
     function configura_simulacao(categoria) {
@@ -1056,6 +1096,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3))
             .force('charge', d3.forceManyBody().strength(carga))
             .force('colisao', d3.forceCollide().radius(d => d.raio))
+            .alphaMin(0.4)
             .on('tick', atualiza_tick);
         
         simulacao.stop()
@@ -1070,6 +1111,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
         let pos_y = simulacao_parametros["pos_y"];
 
         if (opcao == "det-timeline") {
+
+            // esconde total
+            d3.select("h2.total-detalhado").transition().duration(duracao).style("opacity", 0);
+
+
             simulacao
                 .force('x', d3.forceX().strength(magnitudeForca).x(d => pos_x(d.data)))
                 .force('charge', null)
@@ -1112,6 +1158,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
         }
 
         else if (opcao == "det-total") {
+
+            //mostra total de novo
+            d3.select("h2.total-detalhado").transition().duration(duracao).style("opacity", 1);
+
+
             simulacao
                 .force('x', d3.forceX().strength(magnitudeForca).x(dimensoes["principal"].w_numerico/2))
                 .force('y', d3.forceY().strength(magnitudeForca).y(dimensoes["principal"].h_numerico/3))
@@ -1119,6 +1170,8 @@ d3.csv("dados/dados.csv").then(function(dados) {
                 .force('charge', d3.forceManyBody().strength(carga));
             
             d3.select("svg.vis-principal").selectAll("g.axis-detalhado").remove();
+
+            console.log(simulacao_parametros);
 
         };
 
