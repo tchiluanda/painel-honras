@@ -20,6 +20,7 @@ const localeDataBrasil = {
 
 const formataBR   = d3.formatDefaultLocale(localeBrasil).format(",.0f");
 const formataBR_1 = d3.formatDefaultLocale(localeBrasil).format(",.1f");
+const formataBR_2 = d3.formatDefaultLocale(localeBrasil).format(",.2f");
 
 const multiplos = [1, 1e3, 1e6, 1e9, 1e12];
 const sufixo    = ["", "mil", "mi", "bi", "tri"];
@@ -32,7 +33,7 @@ const obj_mult = multiplos.map((d,i) => ({
 const valor_formatado = function(x) {
   for (mult of obj_mult) {
     const val = x/mult.valor;
-    if (val < 1000) return formataBR_1(val) + " " + mult.sufixo;
+    if (val < 1000) return formataBR_2(val) + " " + mult.sufixo;
   }
 }
 
