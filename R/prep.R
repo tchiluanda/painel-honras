@@ -14,7 +14,7 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2020_05.csv",
+honras <- read.csv2("./R/relatorio_honras_2020_06.csv",
                     skip = 10, stringsAsFactors = FALSE)
 
 names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato", 
@@ -24,7 +24,7 @@ names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato",
                    "Honra - Juros/Encargos (Moeda de Origem)", "Honra - Mora (Moeda de Origem)", 
                    "Honra - Total (Moeda de Origem)", "Honra - Principal (R$)", 
                    "Honra Juros/Encargos (R$)", "Honra - Mora (R$)", "Honra - Total (R$)", 
-                   "Ano Regularização", "Mês Regularização")
+                   "Ano Regularização", "Mês Regularização", "remover")
 
 info_cadastrais_raw <- read.csv2("./R/info_cadastrais_2020_04.csv",
                              skip = 10, stringsAsFactors = FALSE)
@@ -35,23 +35,42 @@ info_cadastrais <- info_cadastrais_raw %>%
 
 # processamento inicial ---------------------------------------------------
 
+# verificar novos credores com dput(sort(unique(honras$Credor)))
+# verificar siglas com dput(unique(info_cadastrais_raw$Credor))
+
 credor_siglas <- data.frame(
-  Credor = unique(honras$Credor),
-  Credor_sigla = c("Caixa Econômica",
-                   "Banco Mundial",
-                   "CAF",
-                   "BID", 
-                   "BNDES", 
-                   "Banco do Brasil",
-                   "FONPLATA",
-                   "Bilbao Vizcaya",
-                   "Capitalia",
-                   "AFD",
-                   "Banco do Nordeste",
-                   "Credit Suisse (Externo)",
-                   "Credit Suisse (Interno)",
-                   "JICA",
-                   "Bank of America"),
+  Credor = c(
+    "Agência Francesa de Desevolvimento", 
+    "Banco Bilbao Vizcaya Argentaria", 
+    "Banco do Brasil S/A", 
+    "Banco do Nordeste", 
+    "Banco Mundial", 
+    "Banco Nacional de Desenvolvimento Econômico e Social", 
+    "Banco Suiço de Investimento - Credit Suisse", 
+    "Banco Suiço de Investimento - Credit Suisse-Brasil", 
+    "Bank of America", 
+    "BID", 
+    "Caixa Econômica Federal", 
+    "Corporacão Andina de Fomento", 
+    "Fundo Financeiro para Desenvolvimento da Bacia do Prata", 
+    "Japan International Cooperation Agency", 
+    "UniCredit"),
+  Credor_sigla = c(
+    "AFD",
+    "BBVA",
+    "BB", 
+    "BNB",
+    "BIRD",
+    "BNDES",
+    "CREDIT SUISSE",
+    "CREDIT SUISSE-BRASIL",
+    "BOFA",
+    "BID",
+    "CAIXA",
+    "CAF",
+    "FONPLATA",
+    "JICA",
+    "UniCredit"),
   stringsAsFactors = FALSE
 )
 
