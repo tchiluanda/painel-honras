@@ -1,3 +1,8 @@
+// remove barra caso esteja num iframe
+if (window.frameElement) {
+    d3.select("header.logo").style("display", "none")
+}
+
 const $ultima_data = d3.select("span.js--ultima-data");
 const $qde_honras  = d3.select("strong.js--qde-honras");
 
