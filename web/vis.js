@@ -1,7 +1,9 @@
 // remove barra caso esteja num iframe
-if (window.frameElement) {
+
+if (window.location !== window.parent.location) {
+    console.log("Dentro de um iframe (:/)")
     d3.select("header.logo").style("display", "none")
-}
+} else console.log("Não estou num iframe (ufa! liberdade!).")
 
 const $ultima_data = d3.select("span.js--ultima-data");
 const $qde_honras  = d3.select("strong.js--qde-honras");
@@ -54,7 +56,7 @@ dimensiona_container("agregado");
 
 
 d3.csv("dados/dados.csv").then(function(dados) {
-    console.log(dados.columns);
+    //console.log(dados.columns);
     // ["", "data", "tipo_divida", "Credor_completo", "contrato", "tipo_credor", "mutuario", "tipo_mutuario", "Status", "valor", "mes", "ano", "mes_ano", "data_mes", "Credor", "nome_projeto", "top_mutuario", "pos_ini_mutuario", "pos_ini_Credor", "pos_ini_tipo_divida", "pos_ini_ano"]
     //console.log(dados[0]);
 
@@ -65,7 +67,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     dados.forEach((d,i) => {dados[i].data = d3.timeParse("%Y-%m-%d")(d.data);
                             dados[i]["data_br"] = d3.timeFormat("%d de %B de %Y")(dados[i].data);});
 
-    console.log(dados[0]);
+    //console.log(dados[0]);
 
     const TOTAL = d3.sum(dados, d => d.valor);
     
@@ -180,7 +182,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
         const altura_barras = (h_numerico - margem.bottom - margem.top) / (classe_svg === "auxiliar2" ? segunda_maior_quantidade : max_quantidade);
 
-        console.log("um monte", classe_svg, (h_numerico - margem.bottom - margem.top), segunda_maior_quantidade, max_quantidade, altura_barras);
+        //console.log("um monte", classe_svg, (h_numerico - margem.bottom - margem.top), segunda_maior_quantidade, max_quantidade, altura_barras);
 
         return({
             "h": h, 
@@ -212,7 +214,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
 
     dimensiona_vis();
     
-    console.log({dimensoes});   
+    //console.log({dimensoes});   
 
     ///////////////////////////////////////////////////
     // estados
@@ -709,11 +711,11 @@ d3.csv("dados/dados.csv").then(function(dados) {
             
                 const opcao = this;
 
-                console.log(opcao);
+                //console.log(opcao);
 
                 mes_selecionado = d3.select(opcao).data()[0].mes;
 
-                console.log("Clicou na barra do mês", mes_selecionado);
+                //console.log("Clicou na barra do mês", mes_selecionado);
         
                 let posicao_selecionada;
         
@@ -1084,7 +1086,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             .range([110, dimensoes["principal"].w_numerico - 20])
             .domain([new Date("2016-01-01"), d3.max(dados, d => d.data)]);
 
-        console.log("Configura force", dimensoes["principal"].h_numerico, dimensoes["principal"].w_numerico, pos_x.range(), pos_x.domain(),pos_x(new Date("2016-04-16")));
+        //console.log("Configura force", dimensoes["principal"].h_numerico, dimensoes["principal"].w_numerico, pos_x.range(), pos_x.domain(),pos_x(new Date("2016-04-16")));
 
         simulacao_parametros["magnitude"] = magnitudeForca;
         simulacao_parametros["pos_x"] = pos_x;
@@ -1182,7 +1184,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
             
             d3.select("svg.vis-principal").selectAll("g.axis-detalhado").remove();
 
-            console.log(simulacao_parametros);
+            //console.log(simulacao_parametros);
 
         };
 
@@ -1288,7 +1290,7 @@ d3.csv("dados/dados.csv").then(function(dados) {
     let altura_janela_anterior = window.innerHeight;
 
     function resize_init() {
-        console.log("RESIZE!")
+        //console.log("RESIZE!")
         if (ultima_selecao == "agregado") { 
             if ((window.innerWidth < 1080) & (window.innerHeight != altura_janela_anterior)) {
             }
