@@ -14,8 +14,8 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2020_06.csv",
-                    skip = 10, stringsAsFactors = FALSE)
+honras <- read.csv2("./R/relatorio_honras_2020_07.csv",
+                    skip = 9, stringsAsFactors = FALSE)
 
 names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato", 
                    "Credor", "Classificação do Credor", "Mutuário", "Tipo de Mutuário", 
