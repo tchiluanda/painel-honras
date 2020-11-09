@@ -12,9 +12,10 @@ library(rlang)
 loadfonts()
 
 
+
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2020_09.csv",
+honras <- read.csv2("./R/relatorio_honras_2020_10.csv",
                     skip = 10, stringsAsFactors = FALSE,
                     fileEncoding="latin1")
 
@@ -153,7 +154,7 @@ honras_stack %>%
   summarise(soma = sum(valor)) %>% 
   arrange(desc(soma))
 
-sum(honras_stack$valor[honras_stack$mutuario=="Rio de Janeiro (Estado)"]) / sum(honras_stack$valor)
+  sum(honras_stack$valor[honras_stack$mutuario=="Rio de Janeiro (Estado)"]) / sum(honras_stack$valor)
 length(unique(honras_stack$mutuario))
 
 honras_stack %>% filter(ano == 2020) %>% group_by(Credor) %>% summarise(sum(valor)) %>% arrange(desc(`sum(valor)`))
