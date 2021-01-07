@@ -15,7 +15,7 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2020_11.csv",
+honras <- read.csv2("./R/relatorio_honras_2020_12.csv",
                     skip = 10, stringsAsFactors = FALSE,
                     fileEncoding="latin1")
 
@@ -26,7 +26,7 @@ names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato",
                    "Honra - Juros/Encargos (Moeda de Origem)", "Honra - Mora (Moeda de Origem)", 
                    "Honra - Total (Moeda de Origem)", "Honra - Principal (R$)", 
                    "Honra Juros/Encargos (R$)", "Honra - Mora (R$)", "Honra - Total (R$)", 
-                   "Ano Regularização", "Mês Regularização", "remover")
+                   "Ano Regularização", "Mês Regularização") #, "remover")
 
 info_cadastrais_raw <- read.csv2("./R/info_cadastrais_2020_04.csv",
                              skip = 10, stringsAsFactors = FALSE,
@@ -46,7 +46,8 @@ credor_siglas <- data.frame(
     "Agência Francesa de Desevolvimento", 
     "Banco Bilbao Vizcaya Argentaria", 
     "Banco do Brasil S/A", 
-    "Banco do Nordeste", 
+    "Banco do Nordeste",
+    "BNP",
     "Banco Mundial", 
     "Banco Nacional de Desenvolvimento Econômico e Social", 
     "Banco Suiço de Investimento - Credit Suisse", 
@@ -63,6 +64,7 @@ credor_siglas <- data.frame(
     "BBVA",
     "BB", 
     "BNB",
+    "BNP",
     "BIRD",
     "BNDES",
     "CREDIT SUISSE",
