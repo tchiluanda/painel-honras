@@ -43,16 +43,6 @@ header.logo {
     margin: 0;
 }
 
-@media (max-width: 620px) {
-    header img.logo-tt {
-        display: none;
-    }
-    header.logo {
-        padding: 1.5em 0;
-    }
-}
-
-
 header > h1 {
     display: inline;
     font-size: 1.5rem;
@@ -64,6 +54,23 @@ header > h1 {
     left: 50%;
     top: 50%;
     margin: 0;
+}
+
+@media (max-width: 620px) {
+    header img.logo-tt {
+        display: none;
+    }
+    header.logo {
+        padding: 1.5em 0;
+    }
+
+    header > h1 {
+        left: 0;
+        transform: translate(0,-50%);
+        text-align: center;
+        width: 100%;
+        font-size: 1.4rem;
+    }
 }
 
 .centralizado {
