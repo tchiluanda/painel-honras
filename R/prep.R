@@ -15,7 +15,7 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2020_12.csv",
+honras <- read.csv2("./R/relatorio_honras_2021_01.csv",
                     skip = 10, stringsAsFactors = FALSE,
                     fileEncoding="latin1")
 
@@ -28,7 +28,7 @@ names(honras) <- c("Data de Vencimento", "Tipo de Dívida", "Nome do Contrato",
                    "Honra Juros/Encargos (R$)", "Honra - Mora (R$)", "Honra - Total (R$)", 
                    "Ano Regularização", "Mês Regularização") #, "remover")
 
-info_cadastrais_raw <- read.csv2("./R/info_cadastrais_2020_04.csv",
+info_cadastrais_raw <- read.csv2("./R/info_cadastrais_2020_12.csv",
                              skip = 10, stringsAsFactors = FALSE,
                              fileEncoding="latin1")
 
