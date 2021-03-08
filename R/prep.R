@@ -15,7 +15,7 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2021_01.csv",
+honras <- read.csv2("./R/relatorio_honras_2021_02.csv",
                     skip = 10, stringsAsFactors = FALSE,
                     fileEncoding="latin1")
 
