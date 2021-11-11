@@ -15,7 +15,7 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2021_09.csv",
+honras <- read.csv2("./R/relatorio_honras_2021_10.csv",
                     skip = 10, stringsAsFactors = FALSE,
                     fileEncoding="latin1")
 
@@ -187,7 +187,7 @@ plota_sumario(ano)
 # verifica subtotais meses ------------------------------------------------
 
 honras_pre %>% 
-  filter(ano == 2019, mes == "08") %>% 
+  filter(ano == 2021, mes == "10") %>% 
   mutate(total = sum(valor)) %>% 
   group_by(Credor) %>% 
   summarise(subtotal = sum(valor),
