@@ -15,7 +15,7 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2022_03.csv",
+honras <- read.csv2("./R/relatorio_honras_2022_04.csv",
                     skip = 10, stringsAsFactors = FALSE,
                     fileEncoding="latin1")
 
@@ -203,3 +203,4 @@ honras_pre %>%
             total = first(total)) %>%
   ungroup() %>%
   mutate(pct = scales::percent(subtotal / total))
+
