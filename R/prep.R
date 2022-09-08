@@ -15,7 +15,7 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2022_06.csv",
+honras <- read.csv2("./R/relatorio_honras_2022_08.csv",
                     skip = 10, stringsAsFactors = FALSE,
                     fileEncoding="latin1")
 
@@ -58,7 +58,8 @@ credor_siglas <- data.frame(
     "Corporacão Andina de Fomento", 
     "Fundo Financeiro para Desenvolvimento da Bacia do Prata", 
     "Japan International Cooperation Agency", 
-    "UniCredit"),
+    "UniCredit",
+    "Itaú Unibanco S.A."),
   Credor_sigla = c(
     "AFD",
     "BBVA",
@@ -75,7 +76,8 @@ credor_siglas <- data.frame(
     "CAF",
     "FONPLATA",
     "JICA",
-    "UniCredit"),
+    "UniCredit",
+    "Itaú"),
   stringsAsFactors = FALSE
 )
 
