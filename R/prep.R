@@ -15,7 +15,7 @@ loadfonts()
 
 # importa dados -----------------------------------------------------------
 
-honras <- read.csv2("./R/relatorio_honras_2022_08.csv",
+honras <- read.csv2("./R/relatorio_honras_2022_09.csv",
                     skip = 10, stringsAsFactors = FALSE,
                     fileEncoding="latin1")
 
@@ -82,6 +82,7 @@ credor_siglas <- data.frame(
 )
 
 honras_pre <- honras %>%
+  filter(str_length(`Data de Vencimento`)>0) %>%
   select(data = `Data Regularização do Atraso`,
          tipo_divida = `Tipo de Dívida`,
          `Credor`,
